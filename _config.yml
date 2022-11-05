@@ -1,6 +1,6 @@
-title: Fred Hohman
-tagline: Research Scientist at Apple
-url: http://fredhohman.com
+title: Corentin Choisy
+tagline: Epidemiology & Biostatistics Student at Université Rennes 1
+url: http://corentinchoisy.github.io
 baseurl: ""
 # gems: [jekyll-paginate]
 # paginate: 5
@@ -14,9 +14,9 @@ sass:
   style: compressed
 
 author:
-  name: Fred Hohman
-  url: http://fredhohman.com
-  email: fred.hohman@gmail.com
+  name: Corentin Choisy
+  url: http://corentinchoisy.github.io
+  email: corentin.choisy@etudiant.univ-rennes1.fr
 
 markdown: kramdown
 highlighter: rouge

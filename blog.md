@@ -4,7 +4,7 @@ title: Blog
 permalink: blog/
 ---
 
-<p>Things I think about, read, and write.</p>
+<p>Things All I've read, written and talked about.</p>
 
 <div class="posts">
   {% for post in site.categories.blog limit:5 %}

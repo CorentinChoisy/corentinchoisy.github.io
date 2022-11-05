@@ -5,23 +5,23 @@ title: Home
 
 <div id ="intro-wrapper" class="l-middle">
 	<div id="intro-title-wrapper" class="intro-left">
-		<h1 id="intro-title">Hi, I'm Fred Hohman</h1>
+		<h1 id="intro-title">Corentin Choisy</h1>
 		<div id="intro-subtitle">
-			I'm a Research Scientist at Apple
+			Epidemiology & Biostatistics Student at Université Rennes 1
 		</div>
 	</div>
 	<div class="intro-left">
 	<div class="intro-left">
-		I design and develop interactive interfaces to help people <b>understand machine learning models</b> and data-driven systems. Besides building tools, I also create <b>data visualizations</b> and write interactive articles to simply communicate complex ideas.
+		I build epidemiologic and etiologic models and provide a bigger methodological sensitivity to epidemiologic and clinical studies. I'm also planning to focus more on longitudinal and survival models.
 	</div>
 	<div style="height: 1rem"></div>
 	<div class="intro-left">
-		I received my PhD from Georgia Tech where I worked with <a href="http://www.cc.gatech.edu/~dchau/">Polo Chau</a> and <a href="http://va.gatech.edu/endert/">Alex Endert</a>. My dissertation on <a href="/dissertation">interactive interfaces for interpretability</a> won the <i>ACM SIGCHI Outstanding Dissertation Award</i> and was supported by a <i>NASA Space Technology Research Fellowship</i>.
+		I'm currently going through the second year of M.S. in Epidemiology and Clinical Pharmacology Modeling at ' <a href="https://www.univ-rennes1.fr/">Université Rennes 1</a> and will begin a 6-month internship at <a href="https://sphere-inserm.fr/">Inserm UMR 1246 SPHERE</a> in March 2023.
 		<!-- enabling machine learning interpretability at scale and for everyone -->
 	</div>
 	<div style="height: 1rem"></div>
 	<div>
-		I have collaborated with designers, developers, artists, and scientists while working at <img class="intro-logo" style="width: 19px; padding-bottom: 5px;" src="/images/apple.svg"> Apple, <img class="intro-logo" style="width: 18px; padding-bottom: 3px;" src="/images/microsoft.svg"> Microsoft Research, <img class="intro-logo" style="width: 24px" src="/images/nasa.svg"> NASA Jet Propulsion Lab, and <img class="intro-logo" style="width: 24px;" src="/images/pnnl.svg"> Pacific Northwest National Lab.
+		I have benefited from teaching from researchers and engineers at EHESP and IRSET (Rennes, France), Inserm UMR 1246 SPHERE (Nantes, France) and many other French public research labs in epidemiology, clinical research and public health.
 	</div>
 </div>
 
@@ -49,7 +49,7 @@ title: Home
 
 <hr class="l-middle home-hr">
 
-<h2 class="feature-title l-middle">
+<!-- <h2 class="feature-title l-middle">
 	Featured <a href="/cv#publications">Research Publications</a>
 </h2>
 <div class="cover-wrapper l-screen">
@@ -59,10 +59,10 @@ title: Home
 			{% include feature.html feature=feature %}
 		{% endif %}
 	{% endfor %}
-</div>
+</div> -->
 
 <h2 class="feature-title l-middle">
-	Featured <a href="/dissertation">Dissertation Publications</a>
+	Featured <a href="/dissertation">Papers & Publications</a>
 </h2>
 <div class="cover-wrapper l-screen">
 	{% assign sortedPublications = site.categories.papers | sort: 'feature-order' %}
@@ -73,7 +73,7 @@ title: Home
 	{% endfor %}
 </div>
 
-<h2 class="feature-title l-middle">
+<!-- <h2 class="feature-title l-middle">
 	Featured <a href="/cv#interactive-articles">Interactive Articles</a>
 </h2>
 <div class="cover-wrapper l-screen">
@@ -83,7 +83,7 @@ title: Home
 			{% include feature.html feature=feature %}
 		{% endif %}
 	{% endfor %}
-</div>
+</div> -->
 
 <h2 class="feature-title l-middle">
 	<a href="{{ site.url }}/everything-else" style="color: #303030">Everything Else</a>
@@ -92,7 +92,7 @@ title: Home
 	<a href="{{ site.url }}/projects"><div>Projects</div></a>
 	<a href="{{ site.url }}/blog"><div>Blog</div></a>
 	<a href="{{ site.url }}/stuff-i-use"><div>Stuff I Use</div></a>
-	<a href="{{ site.url }}/monthly-music"><div>Monthly Music</div></a>
+<!--	<a href="{{ site.url }}/monthly-music"><div>Monthly Music</div></a> -->
 	<a href="{{ site.url }}/archive"><div>Archive</div></a>
 </div>
 <!-- <p class="l-middle intro-text" markdown="1">

@@ -6,9 +6,9 @@ jsarr:
 - js/scripts.js
 ---
 
-<h1 id="cv-title"><a href="{{ site.url }}">Fred Hohman</a></h1>
+<h1 id="cv-title"><a href="{{ site.url }}">Corentin Choisy</a></h1>
 
-<p id="cv-subtitle"><i>Research Scientist (<span class="cv-vis">HCI</span> + <span class="cv-ai">ML</span>)</i></p>
+<p id="cv-subtitle"><i>Epidemiology Student (<span class="cv-vis">Modeling</span> + <span class="cv-ai">Methodology</span>)</i></p>
 
 <!-- <div id="cv-toc">
 <ul class="cv-description">
@@ -30,13 +30,13 @@ jsarr:
 </div> -->
 
 <div>
-I design and develop <b><span class="cv-vis">interactive interfaces</span></b> to help people <b><span class="cv-ai">understand machine learning</span></b> models and data-driven systems. Besides building tools, I also create data visualizations and write interactive articles to simply communicate complex ideas.
+I build <b><span class="cv-vis">epidemiologic and etiologic models</span></b> and provide a bigger <b><span class="cv-ai">methodological</span></b> sensitivity to epidemiologic and clinical studies. I'm also planning to focus more on longitudinal and survival models.
 </div>
 
 <div class="cv-spacer"></div>
 
 <div>
-I have collaborated with researchers, designers, developers, and artists while working at Apple, Microsoft Research, NASA Jet Propulsion Lab, and Pacific Northwest National Lab.
+I've benefited from teachings and will work as an intern with multiple researchers and engineers from multiple public research labs in France. I'm planning on starting a PhD project in the next few years.
 </div>
 
 <!-- <div class="cv-spacer"></div>
@@ -74,14 +74,6 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% endfor %}
 {:/}
 
-## Industry Research Experience
-
-{% for experience in site.data.experiences %}
-{% if experience.type == 'industry' %}
-{% include cv/experience.html experience=experience %}
-{% endif %}
-{% endfor %}
-
 ## Academic Research Experience
 
 {% for experience in site.data.experiences %}
@@ -90,15 +82,10 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% endif %}
 {% endfor %}
 
-## Honors and Awards
 
-{% for award in site.data.awards %}
-{% include cv/award.html award=award %}
-{% endfor %}
+## Publications and Projects
 
-## Publications
-
-### Selected: Latest & Greatest
+### Latest
 
 {% assign selectedBoolForBibtex = true %}
 
@@ -125,45 +112,11 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
 {% endfor %}
 
-### Workshop
-
-{% assign workshop = site.categories.papers | where: 'type', "workshop" %}
-{% for pub in workshop %}
-{% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
-{% endfor %}
-
-### Poster
-
-{% assign poster = site.categories.papers | where: 'type', "poster" %}
-{% for pub in poster %}
-{% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
-{% endfor %}
-
-### Demo
-
-{% assign demo = site.categories.papers | where: 'type', "demo" %}
-{% for pub in demo %}
-{% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
-{% endfor %}
-
 ### Miscellaneous
 
 {% assign preprint = site.categories.papers | where: 'type', "misc" %}
 {% for pub in preprint %}
 {% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
-{% endfor %}
-
-## Talks
-
-{% assign talktitles = site.data.talks | group_by:"title" %}
-{% for title in talktitles %}
-{% include cv/talk.html talk=title %}
-{% endfor %}
-
-## Press
-
-{% for press in site.data.press %}
-{% include cv/press.html press=press %}
 {% endfor %}
 
 ## Teaching
@@ -172,34 +125,11 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% include cv/teaching.html teach=teach %}
 {% endfor %}
 
-## Mentoring
-
-{::nomarkdown}
-{% for mentee in site.data.mentoring %}
-{% include cv/mentee.html mentee=mentee %}
-{% endfor %}
-{:/}
-
-## Grants and Funding
-
-{% for fund in site.data.funding %}
-{% include cv/fund.html fund=fund %}
-{% endfor %}
-
-## Interactive Articles
-
-{% for article in site.data.articles %}
-{% unless article.feature-only %}
-{% include cv/article.html article=article %}
-{% endunless %}
-{% endfor %}
-
-
-<!-- ## Technology Skills
+## Technology Skills
 
 {% for skill in site.data.skills %}
 {% include cv/skill.html skill=skill %}
-{% endfor %} -->
+{% endfor %}
 
 ## Service
 
@@ -228,56 +158,43 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% include cv/member.html member=member %}
 {% endfor %}
 
-## Design
-
-{% for design in site.data.designs %}
-{% include cv/design.html design=design %}
-{% endfor %}
-
 ## References
 
 {% for reference in site.data.references %}
 {% include cv/reference.html reference=reference %}
 {% endfor %}
 
-<!-- 
 ## Contact
 
-Fred Hohman  
-`fredhohman@gatech.edu`  
-CODA Tech Square  
-Georgia Tech  
-756 W Peachtree St NW  
-Atlanta, GA 30308
+Corentin Choisy  
+`corentin.choisy@etudiant.univ-rennes1.fr`  
+220, 2 rue d'Alsace  
+35000 Rennes
 <span style="background: linear-gradient(0deg, #34495e, #3498db); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block">
 —  
-USA  
-Earth  
-Solar System  
-Milky Way  
-Local Group  
-Universe  
-</span> -->
+Bretagne
+France
+</span>
 
 
 [cv]: {{ site.url }}/cv.pdf "My CV."
 
-[poloclub]: http://poloclub.gatech.edu "Polo Club of Data Science"
+<!--[poloclub]: http://poloclub.gatech.edu "Polo Club of Data Science"
 [gt]: http://gatech.edu "Georgia Tech"
 [cse]: http://cse.gatech.edu "GT Computational Science and Engineering"
-[coc]: http://www.cc.gatech.edu "GT College of Computing"
+[coc]: http://www.cc.gatech.edu "GT College of Computing" -->
 
-[fred]: http://fredhohman.com "Fred Hohman"
-[polo]: http://www.cc.gatech.edu/~dchau/ "Polo Chau"
-[alex]: http://va.gatech.edu/endert/ "Alex Endert"
+[fred]: http://corentinchoisy.github.io "Corentin Choisy"
+<!--[polo]: http://www.cc.gatech.edu/~dchau/ "Polo Chau"
+[alex]: http://va.gatech.edu/endert/ "Alex Endert" -->
 
-[jpl]: https://www.jpl.nasa.gov/ "NASA Jet Propulsion Lab"
+<!--[jpl]: https://www.jpl.nasa.gov/ "NASA Jet Propulsion Lab"
 [hi]: https://www.hi.jpl.nasa.gov/ "Human Interfaces Group at NASA JPL"
 [pnnl]: https://www.pnnl.gov/ "Pacific Northwest National Laboratory"
 [dsa]: http://www.pnnl.gov/nationalsecurity/technical/capabilities/computing/data_sciences.stm "Data Sciences and Analytics Group at PNNL"
 [msr]: https://www.microsoft.com/en-us/research/ "Microsoft Research"
-[msr-hci]: https://www.microsoft.com/en-us/research/group/human-computer-interaction/ "HCI@MSR"
+[msr-hci]: https://www.microsoft.com/en-us/research/group/human-computer-interaction/ "HCI@MSR" -->
 
-[twitter]: https:/www.twitter.com/fredhohman "@fredhohman"
-[github]: https:/www.github.com/fredhohman "github.com/fredhohman"
-[nstrf]: https://www.nasa.gov/strg/nstrf "NASA Space Technology Research Fellowship"
+[twitter]: https:/www.twitter.com/corentinchoisy "@corentinchoisy"
+[github]: https:/www.github.com/CorentinChoisy "github.com/CorentinChoisy"
+<!-- [nstrf]: https://www.nasa.gov/strg/nstrf "NASA Space Technology Research Fellowship" -->

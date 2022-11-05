@@ -14,28 +14,8 @@ Things I do, including research, academic course projects, and miscellaneous int
     {% endfor %}
 </ul>
 
-
-### Interactive Articles
-<ul>
-    {% for article in site.data.articles %}
-        {% unless article.feature-only %}
-            <li><a href="{{ article.url }}" style="text-transform: capitalize">{{ article.title }}</a> <small style="color: #c0c0c0">{{ article.year }}</small></li>
-        {% endunless %}
-    {% endfor %}
-</ul>
-
-### Parametric Press Articles
-<ul>
-    {% for article in site.data.parametric-articles %}
-        <li><a href="{{ article.url }}" style="text-transform: capitalize">{{ article.title }}</a> <small style="color: #c0c0c0">{{ article.year }}</small></li>
-    {% endfor %}
-</ul>
-
-### Undergraduate Thesis
-[3D Printing the Trefoil Knot and its Pages][trefoil] <small style="color: #c0c0c0">2015</small>
-
-### REU
-[Math & Computational Science REU][reu] <small style="color: #c0c0c0">2014</small>
+### 4th-year Master's Thesis
+[Multiple Testing Correction in Epidemiology][trefoil] <small style="color: #c0c0c0">2015</small>
 
 ### Academic
 <ul>
@@ -56,10 +36,9 @@ Things I do, including research, academic course projects, and miscellaneous int
 
 ### Other
 <ul>
-<li><a href="https://github.com/fredhohman/fredhohman.github.io"><code>fredhohman.com</code> on Github</a></li>
-<li><a href="{{ site.url }}/projects/raspberry-pi-case">Raspberry Pi Case</a> <small style="color: #c0c0c0">2013</small></li>
-<li><a href="{{ site.url }}/projects/road-bike-restoration">Road Bike Restoration</a> <small style="color: #c0c0c0">2012</small></li>
+<li><a href="https://github.com/corentinchoisy/corentinchoisy.github.io"><code>corentinchoisy.github.io</code> on Github</a></li>
+<li><a href="{{ site.url }}/projects/ur1down">UR1 RMarkdown templace</a> <small style="color: #c0c0c0">2021</small></li>
+<li><a href="{{ site.url }}/projects/star-helix">Star Helix Games, roleplaying game design</a> <small style="color: #c0c0c0">2021</small></li>
 </ul>
 
-[trefoil]: {{ site.url }}/projects/3d-printing-the-trefoil-knot-and-its-pages "3D Printing the Trefoil Knot and its Pages"
-[reu]: {{ site.url }}/projects/mathematics-&-computational-science-reu "Mathematics & Computational Science REU"
+[trefoil]: {{ site.url }}/projects/memoire "4th year narrative review project in collaboration with two other students."

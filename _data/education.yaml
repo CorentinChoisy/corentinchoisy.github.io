@@ -1,42 +1,29 @@
-- degree: "Ph.D. in Computational Science & Engineering"
-  institution: Georgia Institute of Technology
-  location: "Atlanta, GA"
-  advisor: Duen Horng (Polo) Chau
-  co-advisor: Alex Endert
-  years: "Dec. 2020 —"
-  years-extra: "Aug. 2015"
-  thesis: "Interactive Scalable Interfaces for Machine Learning Interpretability"
-  thesis-video: https://youtu.be/TNH8RqyNfmo
-  thesis-link: ../dissertation/
-  thesis-pdf: ../papers/fred-hohman-thesis.pdf
-  committee:
-    - Duen Horng (Polo) Chau
-    - Alex Endert
-    - Chao Zhang
-    - Nathan Hodas
-    - Scott Davidoff
-    - Steven Drucker
-  institution-url: https://www.gatech.edu/
-  awards:
-    - ACM SIGCHI Outstanding Dissertation Award
-    - Georgia Tech College of Computing Dissertation Award
-
-- degree: "M.S. in Computational Science & Engineering"
-  institution: Georgia Institute of Technology
-  location: "Atlanta, GA"
-  years: May 2018
-  institution-url: https://www.gatech.edu/
+- degree: "M.S. in Epidemiology and Clinical Pharmacology Modeling"
+  institution: Université Rennes 1
+  location: "Rennes, France"
+  years: 2021-2023
+  institution-url: https://www.univ-rennes1.fr/
+  thesis: "Multiple Testing Correction in Epidemiology"
+  thesis-link: ../projects/ur1down/
+  thesis-pdf: ../papers/memoire.pdf
   description:
-    - "GPA: 4.00/4.00"
+    - "1st year Average: 17.3/20"
+    - "2nd year Average: NA"
 
-- degree: "B.S. in Mathematics, B.S. in Physics"
-  years: "May 2015 —"
-  years-extra: "Aug. 2011"
-  institution: University of Georgia
-  location: "Athens, GA"
-  thesis: "3D Printing the Trefoil Knot and its Pages"
-  thesis-link: ../projects/3d-printing-the-trefoil-knot-and-its-pages/
-  thesis-pdf: ../papers/fred-hohman-undergrad-thesis.pdf
-  description: 
-    - "Overall GPA: 3.84/4.00, Magna Cum Laude, Area of Emphasis in Applied Mathematics"
-  institution-url: https://www.uga.edu/
+- degree: "B.S. in Applied Mathematics"
+  years: "2019 — "
+  years-extra: "2021"
+  institution: Université de Reims Champagne-Ardenne
+  location: "Reims, France"
+  description:
+    - "With High Honours"
+  institution-url: https://www.univ-reims.fr/
+
+- degree: "Classe Préparatoire MPSI"
+  years: "2018 — "
+  years-extra: "2019"
+  institution: Lycée Franklin Roosevelt
+  location: "Reims, France"
+  description:
+    - "With Highest Honours"
+    - "Intensive 1-year course preparing for the top French schools in Math, Physics & IT"
