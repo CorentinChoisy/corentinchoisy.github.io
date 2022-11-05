@@ -7,11 +7,11 @@
   website: "medecine.univ-rennes1.fr/interlocuteurs/ronan-garlantezec"
   url: "https://medecine.univ-rennes1.fr/interlocuteurs/ronan-garlantezec"
 
-  - name: Etienne Dantan
-    position: Associate Professor
-    group: UMR Inserm 1246 SPHERE
-    institution: Université de Nantes
-    location: Nantes, Pays de la Loire, France
-    phd: true
-    website: "sphere-inserm.fr/fr/membre/etienne-dantan"
-    url: "https://sphere-inserm.fr/fr/membre/etienne-dantan"
+- name: Etienne Dantan
+  position: Associate Professor
+  group: UMR Inserm 1246 SPHERE
+  institution: Université de Nantes
+  location: Nantes, Pays de la Loire, France
+  phd: true
+  website: "sphere-inserm.fr/fr/membre/etienne-dantan"
+  url: "https://sphere-inserm.fr/fr/membre/etienne-dantan"
