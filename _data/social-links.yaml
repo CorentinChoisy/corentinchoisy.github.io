@@ -1,40 +1,32 @@
 - id: home
-  description: "fredhohman.com"
+  description: "Personal Website"
   color: "#515151"
   class: "fas fa-home icon"
-  url: "https://fredhohman.com"
+  url: "https://corentinchoisy.github.io"
   on-homepage: false
   cv-group: 1
 
 - id: email
-  description: "fredhohman@gatech.edu"
+  description: "corentin.choisy@etudiant.univ-rennes1.fr"
   color: "#515151"
   class: "fas fa-envelope icon"
-  url: "mailto:fredhohman@gatech.edu"
+  url: "mailto:corentin.choisy@etudiant.univ-rennes1.fr"
   on-homepage: true
   cv-group: 1
 
 - id: twitter
-  description: "@fredhohman"
+  description: "@corentinchoisy"
   color: "#1da1f2"
   class: "fab fa-twitter icon"
-  url: https://twitter.com/fredhohman
+  url: https://twitter.com/corentinchoisy
   on-homepage: true
   cv-group: 2
 
 - id: github
-  description: "@fredhohman"
+  description: "@CorentinChoisy"
   color: "#6e5494"
   class: "fab fa-github icon"
-  url: "https://github.com/fredhohman"
-  on-homepage: true
-  cv-group: 2
-
-- id: scholar
-  description: "Google Scholar"
-  color: "#515151"
-  class: "fa fa-graduation-cap icon"
-  url: "https://scholar.google.com/citations?user=1w0TLT8AAAAJ&hl=en"
+  url: "https://github.com/corentinchoisy"
   on-homepage: true
   cv-group: 2
 
