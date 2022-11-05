@@ -99,26 +99,26 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% assign selectedBoolForBibtex = false %}
 
 
->### Journal
+<!-- ### Journal
 
->{% assign journal = site.categories.papers | where: 'type', "journal" %}
+{% assign journal = site.categories.papers | where: 'type', "journal" %}
 {% for pub in journal %}
 {% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
 {% endfor %}
 
->### Conference
+### Conference
 
->{% assign conference = site.categories.papers | where: 'type', "conference" %}
+{% assign conference = site.categories.papers | where: 'type', "conference" %}
 {% for pub in conference %}
 {% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
 {% endfor %}
 
->### Miscellaneous
+### Miscellaneous
 
->{% assign preprint = site.categories.papers | where: 'type', "misc" %}
+{% assign preprint = site.categories.papers | where: 'type', "misc" %}
 {% for pub in preprint %}
 {% include cv/publication.html pub=pub selectedBoolForBibtex=selectedBoolForBibtex %}
-{% endfor %}
+{% endfor %} -->
 
 ## Teaching
 
@@ -132,32 +132,32 @@ My research is supported by a NASA Space Technology Research Fellowship.
 {% include cv/skill.html skill=skill %}
 {% endfor %}
 
->## Service
+<!-- ## Service
 
-><div class="cv-service-title"><b>Organizer</b></div>
+<div class="cv-service-title"><b>Organizer</b></div>
 {% for venue in site.data.organizer %}
 {% include cv/venue.html venue=venue %}
 {% endfor %}
 
-><div class="cv-service-title"><b>Program Commitee</b></div>
+<div class="cv-service-title"><b>Program Commitee</b></div>
 {% for venue in site.data.pc %}
 {% include cv/venue.html venue=venue %}
 {% endfor %}
 
-><div class="cv-service-title"><b>Reviewer</b></div>
+<div class="cv-service-title"><b>Reviewer</b></div>
 {% for venue in site.data.reviewer %}
 {% include cv/venue.html venue=venue %}
 {% endfor %}
 
-><div class="cv-service-title"><b>Institutional</b></div>
+<div class="cv-service-title"><b>Institutional</b></div>
 {% for institution in site.data.institutional %}
 {% include cv/institutional.html institution=institution %}
 {% endfor %}
 
-><div class="cv-service-title"><b>Member</b></div>
+<div class="cv-service-title"><b>Member</b></div>
 {% for member in site.data.memberships %}
 {% include cv/member.html member=member %}
-{% endfor %}
+{% endfor %} -->
 
 ## References
 
