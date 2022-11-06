@@ -1,7 +1,8 @@
 - degree: "M.S. in Epidemiology and Clinical Pharmacology Modeling"
   institution: Université Rennes 1
   location: "Rennes, France"
-  years: 2021-2023
+  years: "2021 — "
+  years-extra: "2023"
   institution-url: https://www.univ-rennes1.fr/
   thesis: "Multiple Testing Correction in Epidemiology"
   thesis-link: ../projects/ur1down/
