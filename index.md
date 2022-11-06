@@ -47,7 +47,7 @@ title: Home
 </div>
 
 <h2 class="feature-title l-middle">
-	Featured <a href="/dissertation">Papers & Publications</a>
+	Featured <a href="/dissertation">Papers & Projects</a>
 </h2>
 <div class="cover-wrapper l-screen">
 	{% assign sortedPublications = site.categories.papers | sort: 'feature-order' %}
