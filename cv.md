@@ -169,11 +169,11 @@ My research is supported by a NASA Space Technology Research Fellowship.
 
 Corentin Choisy  
 `corentin.choisy@etudiant.univ-rennes1.fr`  
-220, 2 rue d'Alsace  
-35000 Rennes
+9 rue Saint-Léonard  
+44000 Nantes
 <span style="background: linear-gradient(0deg, #34495e, #3498db); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block">
 —  
-Bretagne
+Loire-Atlantique
 France
 </span>
 
