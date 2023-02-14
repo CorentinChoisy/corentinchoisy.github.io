@@ -44,3 +44,10 @@
   class: "fa fa-address-card icon"
   url: "/cv"
   on-homepage: false
+
+- id: teach
+  description: Teaching PDFs
+  color: "#515151"
+  class: "far fa-file-pdf icon"
+  url: "/teach"
+  on-homepage: false
