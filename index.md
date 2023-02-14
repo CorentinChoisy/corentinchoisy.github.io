@@ -41,6 +41,9 @@ title: Home
 			{% if link.id == "cv-web" %}
 				{% include social-link.html link=link %}
 			{% endif %}
+			{% if link.id == "teach" %}
+				{% include social-link.html link=link %}
+			{% endif %}
 		{% endfor %}
 	</div>
 	</div>
