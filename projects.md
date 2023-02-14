@@ -6,16 +6,9 @@ permalink: projects/
 
 Things I do, including research, academic course projects, and miscellaneous interests.
 
-### Research
-<ul>
-    {% for pub in site.categories.papers %}
-    {% assign title = pub.id | split: "/" %}
-    <li><a href="{{ pub.url }}" style="text-transform: capitalize">{{ title[2] }}</a> <small style="color: #c0c0c0">{{ pub.year }}</small></li>
-    {% endfor %}
-</ul>
 
 ### 4th-year Master's Thesis
-[Multiple Testing Correction in Epidemiology][trefoil] <small style="color: #c0c0c0">2015</small>
+[Multiple Testing Correction in Epidemiology][trefoil] <small style="color: #c0c0c0">2022</small>
 
 
 ### Other
