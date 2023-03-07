@@ -7,7 +7,7 @@ title: Home
 	<div id="intro-title-wrapper" class="intro-left">
 		<h1 id="intro-title">Corentin Choisy</h1>
 		<div id="intro-subtitle">
-			Epidemiology & Biostatistics Student at Université Rennes 1
+			Epidemiology Intern at Inserm UMR 1246 SPHERE
 		</div>
 	</div>
 	<div class="intro-left">
@@ -16,7 +16,7 @@ title: Home
 	</div>
 	<div style="height: 1rem"></div>
 	<div class="intro-left">
-		I'm currently going through the second year of M.S. in Epidemiology and Clinical Pharmacology Modeling at ' <a href="https://www.univ-rennes1.fr/">Université Rennes 1</a> and will begin a 6-month internship at <a href="https://sphere-inserm.fr/">Inserm UMR 1246 SPHERE</a> in March 2023.
+		I'm currently going through the second year of M.S. in Epidemiology and Clinical Pharmacology Modeling at ' <a href="https://www.univ-rennes1.fr/">Université Rennes 1</a> and have begun a 6-month internship at <a href="https://sphere-inserm.fr/">Inserm UMR 1246 SPHERE</a> in March 2023.
 		<!-- enabling machine learning interpretability at scale and for everyone -->
 	</div>
 	<div style="height: 1rem"></div>
