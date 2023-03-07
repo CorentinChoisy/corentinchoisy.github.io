@@ -7,10 +7,10 @@
   cv-group: 1
 
 - id: email
-  description: "corentin.choisy@etudiant.univ-rennes1.fr"
+  description: "corentin.choisy@univ-nantes.fr"
   color: "#515151"
   class: "fas fa-envelope icon"
-  url: "mailto:corentin.choisy@etudiant.univ-rennes1.fr"
+  url: "mailto:corentin.choisy@univ-nantes.fr"
   on-homepage: true
   cv-group: 1
 
