@@ -7,7 +7,7 @@
 
         <meta name="author" content="Corentin Choisy" />
     
-        <meta name="date" content="2023-03-30" />
+        <meta name="date" content="2023-03-31" />
     
     <title>Suivi de l’analyse</title>
 
@@ -1512,13 +1512,21 @@ margin-left: 0 !important;
     <h2><a href="#content">Suivi de l’analyse</a></h2>
     <div id="toc">
       <ul>
-      <li><a href="#analyse-descriptive" id="toc-analyse-descriptive">Analyse Descriptive</a></li>
+      <li><a href="#analyse-descriptive" id="toc-analyse-descriptive">Analyse Descriptive</a>
+      <ul>
+      <li><a href="#données-manquantes" id="toc-données-manquantes">Données manquantes</a></li>
+      <li><a href="#partition-apprentissage-validation" id="toc-partition-apprentissage-validation">Partition
+      apprentissage/ validation</a></li>
+      <li><a href="#variables-quasi-séparées" id="toc-variables-quasi-séparées">Variables
+      quasi-séparées</a></li>
+      <li><a href="#descriptif-des-données" id="toc-descriptif-des-données">Descriptif des données</a></li>
+      </ul></li>
       </ul>
     </div>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Corentin
 Choisy</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-03-30</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-03-31</p>
           </div>
    </div>
      
@@ -1533,6 +1541,102 @@ Choisy</p>
 </a>
 <div id="analyse-descriptive" class="section level1">
 <h1>Analyse Descriptive</h1>
+<div id="données-manquantes" class="section level2">
+<h2>Données manquantes</h2>
+<p><strong>Variables autour de 20% manquantes:</strong> Les variables
+<em>Durée d’hospitalisation</em>, <em>Mise sur marchine de
+perfusion</em>, <em>Hématurie du donneur</em> et <em>les immunisations
+HLA et DSA</em> présentent des proportions de données manquantes entre
+15 et 30% dans chaque groupe, ne contre-indiquant a priori pas leur
+utilisation dans les modèles, à l’exception d’un potentiel risque de
+biais.</p>
+<p><strong>Variables mal renseignées:</strong> Les variables
+<em>Antécédent de dyslipidémie du donneur</em> (40% de données
+manquantes), <em>Sérologie AcHBs du donneur</em> (33%) et
+<em>antécédents de grossesse</em> (36% chez les femmes) sont mal
+renseignées avec plus d’un tiers de données manquantes. Ces variables
+devraient être exclues des analyses.</p>
+<p><strong>Autres données manquantes:</strong> La plupart des autres
+variables présentent des proportions de données manquantes plus
+restreintes On pourra proposer, en analyse de sensibilité, d’évaluer
+l’effet de ces problèmes de reseignement sur le modèle. Aucune donnée
+manquante n’a été relevée sur les variables descriptives du suivi
+(évènement, temps d’évènement).</p>
+</div>
+<div id="partition-apprentissage-validation" class="section level2">
+<h2>Partition apprentissage/ validation</h2>
+<p>La partition aléatoire entre l’échantillon d’apprentissage et
+l’échantillon de validation semble avoir produit deux échantillons
+comparables en termes de distribution pour l’ensemble des variables de
+la base. De petits écarts de distribution semblent toutefois apparaître
+sur les indicatrices des immunisations anti-HLA.</p>
+</div>
+<div id="variables-quasi-séparées" class="section level2">
+<h2>Variables quasi-séparées</h2>
+<p>Plusieurs variables catégorielles sont presque exclusivement
+unimodales, et ne pourraient donc être exclues des analyses faute
+d’apport d’information (et pouvant potentiellement entraver le calcul
+des modèles):</p>
+<ul>
+<li>Sérologies HCV, AgHBs, HIV donneur/receveur</li>
+<li>Traitements par inhibiteurs de mTOR et apparentés CNI</li>
+<li>Immunisation DSA</li>
+<li>Incompatibilité ABO (unimodale)</li>
+</ul>
+</div>
+<div id="descriptif-des-données" class="section level2">
+<h2>Descriptif des données</h2>
+<p>Au sein de l’échantillon d’apprentissage (N=4844), la population des
+receveurs répond aux caractéristiques démographiques de l’insuffisance
+rénale chronique, avec une nette majorité masculine (64%) et deux tiers
+de la population âgée d’entre 39 et 67 ans, pour un âge moyen de 53.2
+ans. 25.2% des receveurs présentent une étiologie récidivante d’IRC. Au
+global, une majorité des patients ont reçu un traitement par hemodialyse
+(78.5%) ou par dialyse péritonéale (10.6%). Seuls 10.7% bénéficient
+d’une greffe préemptive et ne sont pas passés par la dialyse,
+correspondant à la tendance nationale rapportée par le réseau REIN en
+2019 (10.9%). 80.4% des receveurs présentent des antécédents
+d’hypertension, 39.4% des antécédents de maladies cardiovasculaires, un
+tiers (33.7%) des antécédents de dyslipidémie et 18.9% des antécédents
+de diabète. Les antécédents de néoplasie et de maladies urologiques
+présentent des prévalences plus faibles, autour de 10%.</p>
+<p>Les temps passés sur liste d’attente et en dialyse sont très
+hétérogènes, témoignant de disparités géographiques et démographiques
+importantes en termes d’accès à la greffe. Cependant, ces durées restent
+globalement longues, avec une durée d’attente moyenne de 703 jours (près
+de 2 ans) et 1157 jours en dialyse (3 ans et 2 mois). De plus, 75% des
+receveurs ont attendu plus de 221 jours (plus de 7 mois) et 75% d’entre
+deux ont passé plus de 495 jours (1 an et 4 mois) en dialyse.</p>
+<p>Les donneurs répondent à de caractéristiques similaires en termes
+d’âge (âge moyen de 53.1 ans) mais sont plus hétérogènes (écart-type de
+17.2 ans contre 14.4 ans, du fait de la présence de donneurs mineurs,
+pédiatriques et de donneurs âgés) et également majoritairement masculins
+(59.7%). 8.3% des donneurs ont été prélevés à coeur arrêté et 49.1% ont
+subi un décès de cause cardiovasculaire. Les antécédents médicaux des
+donneurs correspondaient davantage aux propriétés de la population
+générale française, avec une prévalence des antécédents d’hypertension
+de 28.7%, une prévalence du diabète de 6.8% et 9.1% de dyslipidémiques.
+Les prévalences de la protéinurie et l’hématurie sont nettement plus
+élevées que les estimations populationnelles (38.3% et 52.7%
+respectivement), ce qui était attendu pour des donneurs cadavériques. Au
+regard de leurs caractéristiques, 42.1% des donneurs sont considérés
+marginaux par le critère historique ECD.</p>
+<p>D’un point de vue immunologique, 50% des couples donneur-receveur
+présentent entre 3 et 4 incompatibilités HLA ABDR et aucun ne présente
+d’incompatibilité de groupe sanguin. Si seulement 95 patients (1.96%)
+sont positifs à l’immunisation aux anticorps spécifiques du donneur
+(DSA), 18.5% (classe I) et 15.4% (classe II) sont positifs à
+l’immunisation anti-HLA.</p>
+<p>Les sérologies des donneurs et receveurs sont pour la plupart soit
+très majoritairement positives (EBV) ou très majoritairement négatives
+(HCV, AgHBs, HIV).</p>
+<p>Les variables relatives à la greffe correspondent aux attentes au vu
+des pratiques courantes en transplantation dans le pays. Ainsi, le temps
+d’ischémie froide était inférieur à 1 jour pour plus de 75% des
+partients (Q3=21) et une très forte majorité des patients ont reçu des
+traitements par antiprolifératifs et corticoïdes, ainsi qu’au tacrolimus
+à partir de 2009 (87.2%). Près d’un greffon sur trois (29.1%) a été
+placé sous machine de perfusion.</p>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2652,6 +2756,7 @@ Pre-transplantation DSA immunization
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 
