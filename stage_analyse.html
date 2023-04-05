@@ -7,7 +7,7 @@
 
         <meta name="author" content="Corentin Choisy" />
     
-        <meta name="date" content="2023-04-04" />
+        <meta name="date" content="2023-04-05" />
     
     <title>Suivi de l’analyse</title>
 
@@ -4182,7 +4182,7 @@ margin-left: 0 !important;
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Corentin
 Choisy</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-04</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-05</p>
           </div>
    </div>
      
@@ -5093,10 +5093,24 @@ retenu. Les graphiques à télécharger détaillent la vérification des
 hypothèses du modèle, aboutissant à retenir la forme quadratique pour
 l’IMC du receveur.</p>
 <div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-06e2d60d60e3ac076ea3" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-06e2d60d60e3ac076ea3">{"x":{"filter":"none","vertical":false,"caption":"<caption>Receveur-Donneur<\/caption>","data":[["Recipient Age","Recipient BMI (squared)","Recipient men","Relapsing initial nephropathy","Peritoneal dialysis","Hemodialysis","History of diabetes","History of Dyslipidemia","History of hypertension","History of cardiovascular disease","History of neoplasia","Positive recipient CMV serology","Positive recipient AcHBs serology"],[0.029,0,0.031,0.152,0.1,0.246,0.418,0.005,-0.056,0.311,0.279,-0.022,-0.01],[1.029,1,1.032,1.164,1.106,1.278,1.519,1.005,0.945,1.364,1.322,0.978,0.99],[0.002,0,0.052,0.058,0.118,0.091,0.064,0.053,0.069,0.052,0.074,0.05,0.052],[12.756,2.925,0.598,2.629,0.852,2.704,6.539,0.094,-0.814,6.024,3.783,-0.434,-0.193],[0,0.003,0.55,0.009,0.394,0.007,0,0.925,0.416,0,0,0.664,0.847]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-06e2d60d60e3ac076ea3">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur<\/caption>","data":[["Recipient Age","Recipient BMI (squared)","Recipient men","Relapsing initial nephropathy","Peritoneal dialysis","Hemodialysis","History of diabetes","History of Dyslipidemia","History of hypertension","History of cardiovascular disease","History of neoplasia","Positive recipient CMV serology","Positive recipient AcHBs serology"],[0.029,0,0.031,0.152,0.1,0.246,0.418,0.005,-0.056,0.311,0.279,-0.022,-0.01],[1.029,1,1.032,1.164,1.106,1.278,1.519,1.005,0.945,1.364,1.322,0.978,0.99],[0.002,0,0.052,0.058,0.118,0.091,0.064,0.053,0.069,0.052,0.074,0.05,0.052],[12.756,2.925,0.598,2.629,0.852,2.704,6.539,0.094,-0.814,6.024,3.783,-0.434,-0.193],[0,0.003,0.55,0.009,0.394,0.007,0,0.925,0.416,0,0,0.664,0.847]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="sélection-des-variables-de-la-greffe" class="section level2">
 <h2>Sélection des variables de la greffe</h2>
+<a href="https://github.com/CorentinChoisy/corentinchoisy.github.io/raw/master/_data/stage_code/Greffe.zip">
+<button class="btn btn-success"><i class="fa fa-save"></i> Télécharger les tableaux</button>
+</a>
+<a href="https://github.com/CorentinChoisy/corentinchoisy.github.io/raw/master/_data/stage_code/Greffe_hyp.zip">
+<button class="btn btn-success"><i class="fa fa-save"></i> Télécharger les graphiques</button>
+</a>
+<p>La sélection des variables de la greffe s’est faite en ajoutant une à
+une les variables de la greffe au modèle retenu à l’étape précédente,
+puis en y conservant les variables pour lesquelles <span class="math inline">\(p&lt;0.2\)</span>. Les graphiques à télécharger
+détaillent l’évaluation des hypothèses de proportionnalité des risques
+et de log-linéarité, conduisant à retenir une transformation racine
+carrée pour le temps passé en dialyse.</p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-bb6bb9844c4deaad76f7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-bb6bb9844c4deaad76f7">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur et de la greffe<\/caption>","data":[["Recipient Age","Recipient BMI (squared)","Recipient men","Relapsing initial nephropathy","Hemodialysis","History of diabetes","History of Dyslipidemia","History of hypertension","History of cardiovascular disease","History of neoplasia","Positive recipient CMV serology","Positive recipient AcHBs serology","Time on dialysis (sqrt)","Time on waiting list","HLA A-B-DR incompatibilities","Transplanted before 2008"],[0.028,0,0.019,0.157,0.122,0.391,-0.021,-0.021,0.337,0.195,-0.008,-0.027,0.005,-0,0.112,-0.113],[1.029,1,1.019,1.17,1.13,1.478,0.979,0.979,1.401,1.215,0.992,0.974,1.005,1,1.119,0.893],[0.002,0,0.056,0.062,0.088,0.068,0.057,0.075,0.055,0.079,0.054,0.055,0.002,0,0.021,0.063],[11.663,3.241,0.344,2.546,1.392,5.766,-0.379,-0.286,6.143,2.468,-0.156,-0.479,2.192,-0.209,5.304,-1.789],[0,0.001,0.731,0.011,0.164,0,0.705,0.775,0,0.014,0.876,0.632,0.028,0.834,0,0.074]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":16,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,16,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="sélection-des-variables-du-donneur" class="section level2">
 <h2>Sélection des variables du donneur</h2>
