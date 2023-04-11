@@ -7,7 +7,7 @@
 
         <meta name="author" content="Corentin Choisy" />
     
-        <meta name="date" content="2023-04-07" />
+        <meta name="date" content="2023-04-11" />
     
     <title>Suivi de l’analyse</title>
 
@@ -4182,7 +4182,7 @@ margin-left: 0 !important;
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Corentin
 Choisy</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-07</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-11</p>
           </div>
    </div>
      
@@ -5097,38 +5097,39 @@ variables qualitatives a été évalué par des tests du <span class="math inlin
 <div id="sélection-des-variables-du-receveur" class="section level2">
 <h2>Sélection des variables du receveur</h2>
 <p>La sélection des variables du receveur s’est faite par le biais de
-modèles de Cox à cotes proportionnelles univariés avec <span class="math inline">\(\alpha=0.2\)</span>. Ces analyses conduisent à
-retenir le modèle suivant. Le dossier des tables à télécharger permet
-d’accéder à la table des modèles univariés ayant abouti à ce modèle
-retenu. Les graphiques à télécharger détaillent la vérification des
-hypothèses du modèle, aboutissant à retenir la forme quadratique pour
-l’IMC du receveur.</p>
+modèles de Cox à cotes proportionnelles univariés avec <span class="math inline">\(\alpha=0.2\)</span> avant la procédure backward.
+Ces analyses conduisent à retenir le modèle suivant. Le dossier des
+tables à télécharger permet d’accéder à la table des modèles univariés
+ayant abouti à ce modèle retenu. Les graphiques à télécharger détaillent
+la vérification des hypothèses du modèle, aboutissant à accepter les
+hypothèses pour toutes les variables.</p>
 <div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-9abc52a4014b0bb2b655" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-9abc52a4014b0bb2b655">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur<\/caption>","data":[["Recipient Age","Hemodialysis","Relapsing initial nephropathy","History of diabetes","History of cardiovascular disease","History of neoplasia"],[0.03,0.192,0.134,0.433,0.31,0.254],[1.03,1.211,1.143,1.542,1.363,1.289],[0.002,0.064,0.056,0.061,0.05,0.073],[13.753,3.008,2.376,7.116,6.175,3.496],[0,0.003,0.018,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-9abc52a4014b0bb2b655">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur<\/caption>","data":[["Recipient Age","Hemodialysis","History of diabetes","History of cardiovascular disease","History of neoplasia"],[0.029,0.194,0.412,0.308,0.254],[1.029,1.214,1.509,1.36,1.289],[0.002,0.064,0.06,0.05,0.073],[13.582,3.046,6.844,6.128,3.497],[0,0.002,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":15,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="sélection-des-variables-de-la-greffe" class="section level2">
 <h2>Sélection des variables de la greffe</h2>
 <p>La sélection des variables de la greffe s’est faite en ajoutant une à
 une les variables de la greffe au modèle retenu à l’étape précédente,
-puis en y conservant les variables pour lesquelles <span class="math inline">\(p&lt;0.2\)</span>. Les graphiques à télécharger
-détaillent l’évaluation des hypothèses de proportionnalité des risques
-et de log-linéarité, conduisant à retenir une transformation racine
-carrée pour le temps passé en dialyse. La variable Centre ne vérifiant
-pas la proportionnalité des risques, les analyses suivantes seront
-stratifiées sur le centre</p>
+puis en y conservant les variables pour lesquelles <span class="math inline">\(p&lt;0.2\)</span> avant la procédure backward à
+<span class="math inline">\(p&lt;0.05\)</span>. Les graphiques à
+télécharger détaillent l’évaluation des hypothèses de proportionnalité
+des risques et de log-linéarité, conduisant à proposer une
+catégorisation du temps passé en dialyse. La variable Centre ne
+vérifiant pas la proportionnalité des risques, les analyses finales
+seront stratifiées sur le centre.</p>
 <div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-49dec52796ffa0d67eff" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-49dec52796ffa0d67eff">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur et de la greffe<\/caption>","data":[["Recipient Age","Hemodialysis","Relapsing initial nephropathy","History of diabetes","History of cardiovascular disease","History of neoplasia","HLA A-B-DR incompatibilities&gt;=4","Time on dialysis"],[0.03,0.149,0.119,0.412,0.332,0.187,0.235,0],[1.03,1.161,1.126,1.51,1.394,1.206,1.265,1],[0.002,0.086,0.06,0.064,0.053,0.077,0.064,0],[12.933,1.745,1.981,6.478,6.262,2.428,3.666,2.617],[0,0.081,0.048,0,0,0.015,0,0.009]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":17,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,17,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-49dec52796ffa0d67eff">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu avec les variables du receveur et de la greffe<\/caption>","data":[["Recipient Age","Hemodialysis","History of diabetes","History of cardiovascular disease","History of neoplasia","HLA A-B-DR incompatibilities&gt;=4"],[0.029,0.22,0.401,0.309,0.221,0.246],[1.029,1.246,1.494,1.362,1.247,1.279],[0.002,0.064,0.061,0.051,0.073,0.061],[13.507,3.421,6.62,6.082,3.016,4.018],[0,0.001,0,0,0.003,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":17,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,17,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="sélection-des-variables-du-donneur" class="section level2">
 <h2>Sélection des variables du donneur</h2>
 <p>La sélection des variables du donneur s’est faite en ajoutant une à
 une les variables du donneur au modèle retenu à l’étape précédente, puis
-en y conservant les variables pour lesquelles <span class="math inline">\(p&lt;0.2\)</span>. Les graphiques à télécharger
-détaillent l’évaluation des hypothèses de proportionnalité des risques
-et de log-linéarité, conduisant à retenir une transformation quadratique
-pour l’âge du donneur et l’IMC à la place de la paire taille-poids.</p>
+en y conservant les variables pour lesquelles <span class="math inline">\(p&lt;0.2\)</span> avant la procédure descendante.
+Les graphiques à télécharger détaillent l’évaluation des hypothèses de
+proportionnalité des risques et de log-linéarité, conduisant à retenir
+les hypothèses pour toutes les variables.</p>
 <div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-84b2105891a68850b17e" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-84b2105891a68850b17e">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu après les analyses univariées, sans interactions<\/caption>","data":[["Recipient Age","Hemodialysis","Relapsing initial nephropathy","History of diabetes","History of cardiovascular disease","History of neoplasia","HLA A-B-DR incompatibilities&gt;=4","Time on dialysis","Donor age","Donor weight","Donor height","Donor after cardiac death","Donor death vascular etiology","Donor history of hypertension","Donor CMV serology positive"],[0.018,0.263,0.11,0.43,0.376,0.154,0.191,0,0.01,0.005,-0.009,0.487,0.118,0.101,0.121],[1.019,1.3,1.116,1.537,1.456,1.166,1.211,1,1.01,1.005,0.991,1.627,1.125,1.106,1.129],[0.004,0.103,0.069,0.071,0.06,0.085,0.073,0,0.003,0.002,0.004,0.137,0.065,0.066,0.059],[4.876,2.543,1.593,6.063,6.234,1.806,2.625,1.663,3.173,2.126,-2.42,3.555,1.818,1.532,2.065],[0,0.011,0.111,0,0,0.071,0.009,0.096,0.002,0.033,0.016,0,0.069,0.126,0.039]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":26,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,25,26,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-84b2105891a68850b17e">{"x":{"filter":"none","vertical":false,"caption":"<caption>Modèle retenu après les analyses univariées, sans interactions<\/caption>","data":[["Recipient Age","Hemodialysis","History of diabetes","History of cardiovascular disease","History of neoplasia","HLA A-B-DR incompatibilities&gt;=4","Donor age","Donor weight","Donor height","Donor after cardiac death","Donor death vascular etiology"],[0.019,0.28,0.402,0.339,0.197,0.214,0.011,0.005,-0.01,0.459,0.182],[1.019,1.323,1.494,1.403,1.218,1.239,1.011,1.005,0.99,1.583,1.199],[0.004,0.073,0.066,0.057,0.079,0.067,0.003,0.002,0.003,0.127,0.061],[5.369,3.816,6.052,5.988,2.493,3.175,3.62,2.568,-2.942,3.624,2.97],[0,0,0,0,0.013,0.001,0,0.01,0.003,0,0.003]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>\\beta<\/th>\n      <th>HR<\/th>\n      <th>SE(\\beta)<\/th>\n      <th>statistic<\/th>\n      <th>p<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":26,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,25,26,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
