@@ -7,7 +7,7 @@
 
         <meta name="author" content="Corentin Choisy" />
     
-        <meta name="date" content="2023-04-14" />
+        <meta name="date" content="2023-04-20" />
     
     <title>Suivi de stage</title>
 
@@ -3948,26 +3948,27 @@ margin-left: 0 !important;
       <li><a href="#articles-citant-les-travaux-de-sphere" id="toc-articles-citant-les-travaux-de-sphere">Articles citant les
       travaux de SPHERE</a></li>
       <li><a href="#objectifs" id="toc-objectifs">Objectifs</a></li>
-      <li><a href="#suggestions-dapproche" id="toc-suggestions-dapproche">Suggestions d’approche</a></li>
       </ul></li>
       <li><a href="#plan" id="toc-plan">Plan d’analyse</a>
       <ul>
       <li><a href="#extraction-des-données" id="toc-extraction-des-données">Extraction des données</a></li>
       <li><a href="#description-des-données" id="toc-description-des-données">Description des données</a></li>
-      <li><a href="#etude-des-caractéristiques-du-receveur" id="toc-etude-des-caractéristiques-du-receveur">Etude des
-      caractéristiques du receveur</a></li>
-      <li><a href="#etude-des-caractéristiques-de-la-transplantation" id="toc-etude-des-caractéristiques-de-la-transplantation">Etude
-      des caractéristiques de la transplantation</a></li>
-      <li><a href="#etude-des-caractéristiques-du-donneur" id="toc-etude-des-caractéristiques-du-donneur">Etude des
-      caractéristiques du donneur</a></li>
+      <li><a href="#screening-univarié" id="toc-screening-univarié">Screening univarié</a></li>
+      <li><a href="#sélection-des-variables-du-donneur" id="toc-sélection-des-variables-du-donneur">Sélection des
+      variables du donneur</a></li>
+      <li><a href="#sélection-des-variables-de-la-greffe" id="toc-sélection-des-variables-de-la-greffe">Sélection des
+      variables de la greffe</a></li>
+      <li><a href="#sélection-des-variables-du-receveur" id="toc-sélection-des-variables-du-receveur">Sélection des
+      variables du receveur</a></li>
       <li><a href="#etude-des-interactions" id="toc-etude-des-interactions">Etude des interactions</a></li>
+      <li><a href="#amélioration-du-modèle" id="toc-amélioration-du-modèle">Amélioration du modèle</a></li>
+      <li><a href="#gestion-de-leffet-période-effet-centre" id="toc-gestion-de-leffet-période-effet-centre">Gestion de l’effet
+      période/ effet centre</a></li>
       <li><a href="#calcul-du-score" id="toc-calcul-du-score">Calcul du
       score</a></li>
       <li><a href="#validation-du-score" id="toc-validation-du-score">Validation du score</a></li>
       <li><a href="#construction-du-calculateur-en-ligne" id="toc-construction-du-calculateur-en-ligne">Construction du
       calculateur en ligne</a></li>
-      <li><a href="#construction-de-loutil-de-profilage-et-indice-de-perte-de-chances" id="toc-construction-de-loutil-de-profilage-et-indice-de-perte-de-chances">Construction
-      de l’outil de profilage et indice de perte de chances</a></li>
       <li><a href="#autres-considérations" id="toc-autres-considérations">Autres considérations</a></li>
       <li><a href="#variables" id="toc-variables">Variables</a></li>
       </ul></li>
@@ -3977,13 +3978,12 @@ margin-left: 0 !important;
       <li><a href="#slides" id="toc-slides">Slides</a></li>
       <li><a href="#code" id="toc-code">Code</a></li>
       </ul></li>
-      <li><a href="#biblio" id="toc-biblio">Bibliographie</a></li>
       </ul>
     </div>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Corentin
 Choisy</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-14</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-04-20</p>
           </div>
    </div>
      
@@ -4000,8 +4000,8 @@ Choisy</p>
 <h1>Planification</h1>
 <div id="planning" class="section level2">
 <h2>Planning</h2>
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-8114f873cc64e6e6e81d" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-8114f873cc64e6e6e81d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29"],["03/13  -  03/19","03/20  -  03/26","03/27  -  04/02","04/03  -  04/09","04/10  -  04/16","04/17  -  04/23","04/24  -  04/30","05/01  -  05/07","05/08  -  05/14","05/15  -  05/21","05/22  -  05/28","05/29  -  06/04","06/05  -  06/11","06/12  -  06/18","06/19  -  06/25","06/26  -  07/02","07/03  -  07/09","07/10  -  07/16","07/17  -  07/23","07/24  -  07/30","07/31  -  08/06","08/07  -  08/13","08/14  -  08/20","08/21  -  08/27","08/28  -  09/03","09/04  -  09/10","09/11  -  09/17","09/18  -  09/24","09/25  -  10/01"],["Revue de la littérature","Relecture des articles SPHERE et exploration des articles les citant","Poser questions Magali sur le papier","Fin analyse descriptive","Suite analyse univariée","Fin analyse univariée","","Fin modèles multivariés","","","","Fin validation","","","","Fin analyse de sensibilité","","","","","","","","","","","","",""],["✓","✓","✓","✓","En cours","","","","","","","","","","","","","","","","","","","","","","","",""],["Etablir plan d'analyse","Schéma de résumé du système d'allocation","Lecture du plan d'analyse et suggestion d'amendements","Début analyse univariée","","Début modèles multivariés","","Début validation","","","","Début analyse de sensibilité","","","","","","","","","","","","","","","","",""],["✓","✓","✓","✓","","","","","","","","","","","","","","","","","","","","","","","","",""],["Révision données de survie","Biblio variables/ etiologie","Début analyse descriptive","","","","","","","","","","","","","","","","","","","","","","","","","",""],["✓","✓","✓","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","Biblio construction scores","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","✓","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","Intro: contexte global et objectifs","Intro: approfondissement","Matériel et méthodes","","","","","","","","","","","","","","","","","","","","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Dates<\/th>\n      <th>Objectif1<\/th>\n      <th>OK<\/th>\n      <th>Objectif2<\/th>\n      <th>OK<\/th>\n      <th>Objectif3<\/th>\n      <th>OK<\/th>\n      <th>Objectif4<\/th>\n      <th>OK<\/th>\n      <th>Mémoire<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-874648e705938a07c0c7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-874648e705938a07c0c7">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29"],["03/13  -  03/19","03/20  -  03/26","03/27  -  04/02","04/03  -  04/09","04/10  -  04/16","04/17  -  04/23","04/24  -  04/30","05/01  -  05/07","05/08  -  05/14","05/15  -  05/21","05/22  -  05/28","05/29  -  06/04","06/05  -  06/11","06/12  -  06/18","06/19  -  06/25","06/26  -  07/02","07/03  -  07/09","07/10  -  07/16","07/17  -  07/23","07/24  -  07/30","07/31  -  08/06","08/07  -  08/13","08/14  -  08/20","08/21  -  08/27","08/28  -  09/03","09/04  -  09/10","09/11  -  09/17","09/18  -  09/24","09/25  -  10/01"],["Revue de la littérature","Relecture des articles SPHERE et exploration des articles les citant","Poser questions Magali sur le papier","Fin analyse descriptive","Suite modélisation","Fin modèles multivariés","","","","","","Fin validation","","","","Fin analyse de sensibilité","","","","","","","","","","","","",""],["✓","✓","✓","✓","✓","✓","","","","","","","","","","","","","","","","","","","","","","",""],["Etablir plan d'analyse","Schéma de résumé du système d'allocation","Lecture du plan d'analyse et suggestion d'amendements","Début modélisation","","Mise au propre","","Début validation","","","","Début analyse de sensibilité","","","","","","","","","","","","","","","","",""],["✓","✓","✓","✓","","✓","","","","","","","","","","","","","","","","","","","","","","",""],["Révision données de survie","Biblio variables/ etiologie","Début analyse descriptive","","","Diapo shrinkage","","","","","","","","","","","","","","","","","","","","","","",""],["✓","✓","✓","","","En cours","","","","","","","","","","","","","","","","","","","","","","",""],["","Biblio construction scores","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","✓","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","Intro: contexte global et objectifs","Intro: approfondissement","Matériel et méthodes","Méthodes et début résultats","","","","","","","","","","","","","","","","","","","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Dates<\/th>\n      <th>Objectif1<\/th>\n      <th>OK<\/th>\n      <th>Objectif2<\/th>\n      <th>OK<\/th>\n      <th>Objectif3<\/th>\n      <th>OK<\/th>\n      <th>Objectif4<\/th>\n      <th>OK<\/th>\n      <th>Mémoire<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="ce-qui-a-été-fait" class="section level2">
 <h2>Ce qui a été fait</h2>
@@ -4071,6 +4071,12 @@ de sensibilité</li>
 <li>Rédaction de l’abstract pour le congrès nan’thèse.</li>
 <li>Evaluation de l’effet centre/période (modèles de fragilité/
 régresseurs linéaires)</li>
+</ul>
+<p><strong>Semaine du 17 avril:</strong></p>
+<ul>
+<li>Fin de la construction du modèle</li>
+<li>Mise au propre du code et de la page web</li>
+<li>Recherche sur le shrinkage</li>
 </ul>
 </div>
 </div>
@@ -4226,60 +4232,6 @@ permettant d’identifier, pour un greffon marginal donné, les profils de
 patient pouvant bénéficier au mieux d’une greffe de ce greffon au regard
 du bénéfice attendu avec un greffon non marginal.</p>
 </div>
-<div id="suggestions-dapproche" class="section level2">
-<h2>Suggestions d’approche</h2>
-<p>Etant donnée la duplicité des objectifs (score donneur/ évaluation),
-plusieurs approches possibles à considérer:</p>
-<ul>
-<li><p>Construction d’un score donneur indépendant des caractéristiques
-du receveur et calcul de seuils d’acceptabilité des greffons (selon
-l’hypothèse de sur-risque jugé acceptable) ou de plusieurs catégories en
-fonction du risque.</p></li>
-<li><p>Score donneur exprimé en fonction des caractéristiques du
-receveur (un score pour receveur H, un score pour receveur F par ex.)
-permettant le calcul analytique de profils receveurs (donnant un score
-donneur-receveur permettant de comparer le potentiel de différents
-receveurs). Application permettant de calculer le profil d’un receveur
-“idéal” et d’un receveur “minimum acceptable” à partir des informations
-du donneur.</p>
-<ul>
-<li><strong>Problème:</strong> une telle approche donnerait toujours le
-receveur théorique le plus jeune et en bonne santé possible. Il faudrait
-ainsi réaliser ce profilage en cherchant à maximiser le ratio entre la
-survie prédite avec le greffon et la survie maximum espérée (qui
-pourrait s’exprimer sous la forme de l’espérance de vie attendue avec un
-greffon non marginal). On chercherait donc <span class="math inline">\(Z_1...Z_M\)</span> maximisant:</li>
-</ul>
-<p><span class="math display">\[I =
-\frac{f(X_1^G,...,X_N^G,Z_1,...,Z_M)}{f(X_1^+,...,X_N^+,Z_1,...,Z_M)}\]</span></p>
-<p>Avec:</p>
-<ul>
-<li><span class="math inline">\(Z_1...Z_M\)</span> les caractéristiques
-du receveur comprises dans le modèle</li>
-<li><span class="math inline">\(X_1^G...X_N^G\)</span> les
-caractéristiques du donneur G étudié</li>
-<li><span class="math inline">\(X_1^+...X_N^+\)</span> les
-caractéristiques d’un donneur “universellement bon” défini par a priori
-clinique (donneur réaliste) ou manuellement en regardant les
-coefficients du modèle (meilleur des mondes)</li>
-<li><span class="math inline">\(f\)</span> la fonction de prédiction du
-temps de survie définie par le modèle de Cox</li>
-</ul></li>
-</ul>
-<ul>
-<li>Possibilité de considérer ce ratio individuellement pour chaque
-patient pour donner une idée de la perte de chances par rapport au
-greffon optimal pour chaque patient. Egalement possible de se comparer à
-un greffon “moyen” ou à la dialyse.</li>
-<li>Pourrait ne pas poser problème si on choisit de construire le score
-comme le KDRI, c’est-à-dire en prenant pour référence un donneur de 40
-ans en bonne santé.</li>
-</ul>
-<ul>
-<li>( Simuler l’outcome sur l’échantillon DIVAT d’une allocation suivant
-notre score )</li>
-</ul>
-</div>
 </div>
 <div id="plan" class="section level1">
 <h1>Plan d’analyse</h1>
@@ -4308,96 +4260,139 @@ suite</li>
 ecarts-types, médianes) par échantillon.</li>
 <li>Nombres de données manquantes.
 <ul>
-<li>Exclusion des variables à forte proportion de données manquantes et
-quasi-séparées.</li>
+<li>Exclusion des variables à forte proportion de données manquantes (+
+de 15%) et quasi-séparées (Plus de 90% dans une modalité).</li>
 </ul></li>
+<li>Tableau descriptif des données par centre.</li>
 </ul>
 <p><strong>Description du suivi:</strong></p>
 <ul>
 <li>Kaplan-Meier global et par centre dans chaque échantillon.</li>
+<li>Kaplan-Meier tronqué par centre.</li>
 <li>Statistiques descriptives de la survie dans chaque échantillon.</li>
 </ul>
 </div>
-<div id="etude-des-caractéristiques-du-receveur" class="section level2">
-<h2>Etude des caractéristiques du receveur</h2>
-<p><strong>Sélection univariée:</strong></p>
+<div id="screening-univarié" class="section level2">
+<h2>Screening univarié</h2>
 <ul>
-<li>Modèles linéaires et tests du <span class="math inline">\(\chi2\)</span> entre variables du donneur et du
-receveur.</li>
-<li>Modèles de cox univariés sur les variables du receveur, retenant les
-variables avec p&lt;0.2.</li>
-<li>Construction d’un modèle multivarié de base avec les variables du
-receveur.</li>
+<li>Modèles de Cox univariés retenant les variables à <span class="math inline">\(p \le 0.2\)</span></li>
+<li>Vérification graphique des hypothèses de log-linéarité sur les 95
+percentiles centraux des résidus de martingale et adaptation si
+besoin.</li>
+<li>Vérification graphique de l’hypothèse de proportionnalité des
+risques via les résidus de Schoenfeld (toutes les variables), et par
+<span class="math inline">\(log-log\)</span> (variables
+catégorielles).</li>
 </ul>
 </div>
-<div id="etude-des-caractéristiques-de-la-transplantation" class="section level2">
-<h2>Etude des caractéristiques de la transplantation</h2>
-<p><strong>Sélection univariée:</strong></p>
-<ul>
-<li>Modèles de cox multivariés en ajoutant une variable de la
-transplantation au modèle de base des variables du receveur, retenant
-les variables donneur avec p&lt;0.2.</li>
-</ul>
-</div>
-<div id="etude-des-caractéristiques-du-donneur" class="section level2">
-<h2>Etude des caractéristiques du donneur</h2>
-<p><strong>Vérification des hypothèses de modélisation:</strong></p>
-<ul>
-<li>Log-linéarité évaluée via les résidus de martingale.
-<ul>
-<li>Essai de plusieurs transformations simples sur les variables non
-log-linéaires. Passage en classe si aucune forme adéquate trouvée.</li>
-</ul></li>
-<li>Proportionnalité des risques via les résidus de Schoenfeld et le
-graphe <span class="math inline">\(log(-log)\)</span>.
-<ul>
-<li>On préfèrera éviter de stratifier, possibilité de recoder les
-variables si besoin.</li>
-</ul></li>
-</ul>
-<p><strong>Sélection “univariée”:</strong></p>
-<ul>
-<li>Modèles de cox multivariés en ajoutant une variable du donneur au
-modèle de base des variables du receveur, retenant les variables donneur
-avec p&lt;0.2.</li>
-<li>Construction d’un modèle multivarié complet comprenant les variables
-du receveur et du donneur retenues. Possibilité de forcer des variables
-dans ce modèle complet initial si elles sont suspectées de confondre
-l’effet des variables du donneur.
-<ul>
-<li>Choix des facteurs de confusion potentiels sur a priori clinique ou
-épidémiologique.</li>
-<li>Et/ ou sur la base de la matrice de corrélation.</li>
-</ul></li>
-</ul>
+<div id="sélection-des-variables-du-donneur" class="section level2">
+<h2>Sélection des variables du donneur</h2>
 <p><strong>Sélection multivariée:</strong></p>
 <ul>
-<li>Sélection pas-à-pas descendante basée sur l’AIC/BIC ou C-Statistic.
-<span style="color: red;">Application d’une procédure de shrinkage joint
-APRES sélection des interactions</span>.</li>
-<li>Si validation externe possible, possibilité d’omettre le shrinkage
-et d’ajuster les coefficients via la validation externe.</li>
+<li>Injection des variables du donneur retenues en univarié dans un
+modèle multivarié.</li>
+<li>Sélection pas-à-pas descendante à <span class="math inline">\(p \le
+0.05\)</span>.</li>
+</ul>
+</div>
+<div id="sélection-des-variables-de-la-greffe" class="section level2">
+<h2>Sélection des variables de la greffe</h2>
+<p><strong>Sélection multivariée:</strong></p>
+<ul>
+<li>Injection des variables de la greffe retenues en univarié dans un
+modèle multivarié avec les variables du donneur retenues à l’étape
+précédente.</li>
+<li>Sélection pas-à-pas descendante à <span class="math inline">\(p \le
+0.05\)</span> en forcant les variables du donneur.</li>
+</ul>
+</div>
+<div id="sélection-des-variables-du-receveur" class="section level2">
+<h2>Sélection des variables du receveur</h2>
+<p><strong>Sélection multivariée:</strong></p>
+<ul>
+<li>Injection des variables du receveur retenues en univarié dans un
+modèle multivarié avec les variables du donneur et de la greffe retenues
+à l’étape précédente.</li>
+<li>Sélection pas-à-pas descendante à <span class="math inline">\(p \le
+0.05\)</span> en forcant les variables du donneur et de la greffe.</li>
 </ul>
 </div>
 <div id="etude-des-interactions" class="section level2">
 <h2>Etude des interactions</h2>
+<p><strong>Screening univarié:</strong></p>
 <ul>
-<li>Interactions suspectées dans la littérature et sur a priori
-clinique.</li>
-<li>Test des interactions suspectées sur la base de la matrice de
-corrélation donneur-receveur.</li>
-<li>Elimination des interactions non significativement
-significatives.</li>
+<li>Croisement des variables du donneur avec celles du receveur et de la
+greffe dans des modèles de régression linéaire et tests du <span class="math inline">\(\chi2\)</span> univariés et mise de côté des
+paires avec <span class="math inline">\(p \le 0.2\)</span>.</li>
+</ul>
+<p><strong>Sélection multivariée:</strong></p>
+<ul>
+<li>Test de la significativité des interactions entre les paires mises
+de côté de variables présentes dans le modèle en les injectant une à une
+dans le modèle (<span class="math inline">\(p \le 0.2\)</span>).</li>
+<li>Sélection descendante en forcant les effets simples, critère d’arrêt
+<span class="math inline">\(p \le 0.05\)</span>.</li>
+<li>Test de la significativité des interactions entre les paires mises
+de côté comprenant une variable du modèle et une variable hors du modèle
+en les injectant une à une dans le modèle (<span class="math inline">\(p
+\le 0.2\)</span>).</li>
+<li>Sélection descendante en forcant les effets simples et les
+interactions internes, critère d’arrêt <span class="math inline">\(p \le
+0.05\)</span>.</li>
+</ul>
+</div>
+<div id="amélioration-du-modèle" class="section level2">
+<h2>Amélioration du modèle</h2>
+<p><strong>Enrichissement du modèle:</strong></p>
+<ul>
+<li>Test d’ajout des variables absentes du modèle dans le modèle obtenu
+à l’issue des étapes précédentes, retenant les variables avec <span class="math inline">\(p \le 0.2\)</span>.</li>
+<li>Sélection descendante en forcant tout sauf ces nouvelles variables
+dans le modèle.</li>
+</ul>
+<p><strong>Remise en cause des effets fixes:</strong></p>
+<ul>
+<li>Sélection descendante en forcant les interactions pour éliminer les
+variables ajustées par des effets ajoutés au modèle après leur
+sélection.</li>
+<li>Vérification de l’absence d’effet confondant des variables éliminées
+sur les variables du donneur (variation de coefficient de + de 10% ou
+augmentation de l’AIC après suppression sur cas complets). Conservation
+de la variable si c’est le cas.</li>
+</ul>
+<p><strong>Enrichissement des interactions:</strong></p>
+<ul>
+<li>Nouveau test des interactions entre les variables présentes dans le
+modèle.</li>
+<li>Sélection descendante en forcant tout sauf les interactions
+nouvellement ajoutées.</li>
+</ul>
+</div>
+<div id="gestion-de-leffet-période-effet-centre" class="section level2">
+<h2>Gestion de l’effet période/ effet centre</h2>
+<p><strong>Effet centre:</strong></p>
+<ul>
+<li>Evaluation de la significativité de l’effet centre dans un modèle de
+fragilité avec un effet aléatoire (spécifié loi gamma) et comparaison de
+l’AIC avec le modèle sans effet centre.</li>
+</ul>
+<p><strong>Effet période:</strong></p>
+<ul>
+<li>Test de la significativité du régresseur linéaire d’un indicateur
+binaire avant après pour les dates entre 2007 et 2012.</li>
+<li>Test avec modèle de fragilité si proportionnalité des risques non
+respectée.</li>
+</ul>
+<p><strong>Amélioration du modèle:</strong></p>
+<ul>
+<li>Répétition des étapes d’amélioration du modèle sur le modèle
+comprenant les éventuels effets période et centre.</li>
 </ul>
 </div>
 <div id="calcul-du-score" class="section level2">
 <h2>Calcul du score</h2>
 <ul>
-<li>Calcul du score donneur comme combinaison linéaires des variables
-donneur conservées dans le modèle.</li>
-<li>Déclinaison du score donneur en plusieurs scores en fonctions des
-facteurs d’interaction retenus (un score H/F, un score par catégorie
-d’âge etc.)</li>
+<li>A DETERMINER</li>
 </ul>
 </div>
 <div id="validation-du-score" class="section level2">
@@ -4406,7 +4401,6 @@ d’âge etc.)</li>
 rapide des bonnes propriétés et hypothèses a posteriori du modèle.</p>
 <ul>
 <li>Test a posteriori de la proportionnalité des risques.</li>
-<li>Goodness of fit test.</li>
 </ul>
 <p><strong>Description de l’échantillon en fonction du
 score:</strong></p>
@@ -4424,14 +4418,13 @@ performances pronostiques avec prise en compte des covariables,
 <li><p>Calibration</p>
 <ul>
 <li>Calibration plot</li>
-<li>Hosmer-Lemeshow pour modèle de Cox</li>
 <li>Survie prédite vs. observée par quantile de score.</li>
 </ul></li>
 <li><p>Discrimination</p>
 <ul>
 <li>Courbe ROC temps-dépendante <strong>sans</strong> ajustement sur les
-covariables</li>
-<li>AUC, C-statistic</li>
+covariables entre 1 an et X ans.</li>
+<li>AUC</li>
 <li>VPP/VPN, Se/Sp</li>
 </ul></li>
 <li><p>Performance globale</p></li>
@@ -4472,26 +4465,6 @@ shrinkage)</span>.</li>
 <li>Application en ligne permettant de calculer le score en fonction des
 caractéristiques du greffon et du receveur.</li>
 <li>Estimation de la probabilité d’échec de greffe.</li>
-</ul>
-</div>
-<div id="construction-de-loutil-de-profilage-et-indice-de-perte-de-chances" class="section level2">
-<h2>Construction de l’outil de profilage et indice de perte de
-chances</h2>
-<ul>
-<li>Indice de perte de chances: Ratio de la durée/ probabilité de survie
-estimée avec le greffon proposé par rapport à celle estimée avec un
-greffon:
-<ul>
-<li>Standard tel que défini par un clinicien</li>
-<li>Moyen (statistiquement)</li>
-<li>Optimal tel que défini par un clinicien</li>
-<li>Moyen reçu par les receveurs similaires.</li>
-</ul></li>
-<li>Approche par le calcul ou par score de propension.</li>
-<li>Profilage via maximisation analytique de cet indice (identification
-du receveur perdant le moins de chances en recevant un greffon marginal
-aux caractéristiques connues).</li>
-<li>Intégration de cette fonctionnalité à l’application shiny.</li>
 </ul>
 </div>
 <div id="autres-considérations" class="section level2">
@@ -4606,72 +4579,6 @@ d’anticorps dirigés contre les antigènes HLA du donneur.</li>
 <button class="btn btn-danger"><i class="fa fa-save"></i> Code R - Principal</button>
 </a>
 </div>
-</div>
-<div id="biblio" class="section level1">
-<h1>Bibliographie</h1>
-<ol style="list-style-type: decimal">
-<li><p>Querard AH, Foucher Y, Combescure C, Dantan E, Larmet D, Lorent
-M, Pouteau LM, Giral M, Gillaizeau F. Comparison of survival outcomes
-between Expanded Criteria Donor and Standard Criteria Donor kidney
-transplant recipients: a systematic review and meta-analysis. Transpl
-Int. 2016 Apr;29(4):403-15. doi: 10.1111/tri.12736. Epub 2016 Feb 12.
-PMID: 26756928.</p></li>
-<li><p>Querard AH, Le Borgne F, Dion A, Giral M, Mourad G, Garrigue V,
-Rostaing L, Kamar N, Loupy A, Legendre C, Morelon E, Buron F, Foucher Y,
-Dantan E. Propensity score-based comparison of the graft failure risk
-between kidney transplant recipients of standard and expanded criteria
-donor grafts: Toward increasing the pool of marginal donors. Am J
-Transplant. 2018 May;18(5):1151-1157. doi: 10.1111/ajt.14651. Epub 2018
-Feb 8. PMID: 29316230. <a name="dantan"></a></p></li>
-<li><p>Dantan E, Le Borgne F, Giral M, Dion A, Querard AH, Foucher Y.
-Covariates adjustment questioned conclusions of predictive analyses: an
-illustration with the Kidney Donor Risk Index. J Clin Epidemiol. 2021
-Jul;135:103-114. doi: 10.1016/j.jclinepi.2021.02.007. Epub 2021 Feb 9.
-PMID: 33577986.</p></li>
-<li><p>Rao PS, Schaubel DE, Guidinger MK, Andreoni KA, Wolfe RA, Merion
-RM, Port FK, Sung RS. A comprehensive risk quantification score for
-deceased donor kidneys: the kidney donor risk index. Transplantation.
-2009 Jul 27;88(2):231-6. doi: 10.1097/TP.0b013e3181ac620b. PMID:
-19623019.</p></li>
-<li><p>Maggiore U, Cravedi P. The marginal kidney donor. Curr Opin Organ
-Transplant. 2014 Aug;19(4):372-80. doi: 10.1097/MOT.0000000000000081.
-PMID: 24977323; PMCID: PMC6697142. <a name="imput"></a></p></li>
-<li><p>Shah AD, Bartlett JW, Carpenter J, Nicholas O, Hemingway H.
-Comparison of random forest and parametric imputation models for
-imputing missing data using MICE: a CALIBER study. Am J Epidemiol. 2014
-Mar 15;179(6):764-74. doi: 10.1093/aje/kwt312. Epub 2014 Jan 12. PMID:
-24589914; PMCID: PMC3939843. <a name="stepwise"></a></p></li>
-<li><p>Flom, P.L., &amp; Cassell, D.L. (2007). Stopping stepwise: Why
-stepwise and similar selection methods are bad, and what you should
-use.</p></li>
-<li><p>Wu Y. ELASTIC NET FOR COX’S PROPORTIONAL HAZARDS MODEL WITH A
-SOLUTION PATH ALGORITHM. Stat Sin. 2012;22:27-294. doi:
-10.5705/ss.2010.107. PMID: 23226932; PMCID: PMC3515861.
-<a name="UAS"></a></p></li>
-<li><p>Audry B, Savoye E, Pastural M, Bayer F, Legeai C, Macher MA,
-Kerbaul F, Jacquelinet C. The new French kidney allocation system for
-donations after brain death: Rationale, implementation, and evaluation.
-Am J Transplant. 2022 Dec;22(12):2855-2868. doi: 10.1111/ajt.17180. Epub
-2022 Sep 12. PMID: 36000787. <a name="FC1"></a></p></li>
-<li><p>Kaboré R, Haller MC, Harambat J, Heinze G, Leffondré K. Risk
-prediction models for graft failure in kidney transplantation: a
-systematic review. Nephrol Dial Transplant. 2017 Apr
-1;32(suppl_2):ii68-ii76. doi: 10.1093/ndt/gfw405. PMID: 28206633.
-<a name="FC1"></a> <a name="FC2"></a></p></li>
-<li><p>Foroutan F, Friesen EL, Clark KE, Motaghi S, Zyla R, Lee Y,
-Kamran R, Ali E, De Snoo M, Orchanian-Cheff A, Ribic C, Treleaven DJ,
-Guyatt G, Meade MO. Risk Factors for 1-Year Graft Loss After Kidney
-Transplantation: Systematic Review and Meta-Analysis. Clin J Am Soc
-Nephrol. 2019 Nov 7;14(11):1642-1650. doi: 10.2215/CJN.05560519. Epub
-2019 Sep 20. PMID: 31540931; PMCID: PMC6832056.
-<a name="charms"></a></p></li>
-<li><p>Moons KG, de Groot JA, Bouwmeester W, Vergouwe Y, Mallett S,
-Altman DG, Reitsma JB, Collins GS. Critical appraisal and data
-extraction for systematic reviews of prediction modelling studies: the
-CHARMS checklist. PLoS Med. 2014 Oct 14;11(10):e1001744. doi:
-10.1371/journal.pmed.1001744. PMID: 25314315; PMCID:
-PMC4196729.</p></li>
-</ol>
 </div>
 </div>
 
