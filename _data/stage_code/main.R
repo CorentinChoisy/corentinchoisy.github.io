@@ -1,37 +1,42 @@
 #####################################################################################################################
 # IMPORT
 #####################################################################################################################
-library(ggplot2)
-library(dplyr)
-library(rcartocolor)
-library(RColorBrewer)
-library(ggrepel)
-library(plotly)
-library(knitr)
-library(gridExtra)
-library(ggsurvfit)
-library(survival)
-library(survminer)
-library(table1)
-library(questionr)
-library(ggcorrplot)
-library(kableExtra)
-library(broom)
-library(tidyr)
-library(lmtest)
+library(ggplot2) # Pour les graphiques
+library(ggsurvfit) # Graphiques de Kaplan-Meier avancés
+library(ggrepel) # Arrangement automatique des labels des points superposés sur les graphes
+library(RColorBrewer) # Gestion avancée des couleurs
+library(plotly) # Graphiques interactifs
+library(gridExtra) # Manipulation des objets graphiques
+library(knitr) # Export et custimisation des tables
+library(kableExtra) # Customisation avancée des tableaux exportés
+library(table1) # Tables descriptives rapides
+library(dplyr) # Syntaxe pipe, data management et graphiques
+library(broom) # Data management
+library(tidyr) # Data management
+library(tidyr) # Data management
+library(survival) # Analyses de survie
+library(survminer) # Analyse de survie avancée
+library(lmtest) # Tests de rapport de vraisemblance
+library(shrink) # Shrinkage
+library(StepReg) # Stepwise cox
+library(rms) # Backward amélioré pour cph
+library(base.rms) # Conversion coxph vers cph
+library(glmnet) # Régression LASSO
+library(tidyverse) # Data management courbes ROC 
+library(survivalROC) # Courbes ROC temps dépendante
+library(survival.calib) # Calibration pour modèles de survie
+library(riskRegression) # Prédiction des risques
 
 ## Paramètres
 
 # Centrage des titres GGplot
 theme_update(plot.title = element_text(hjust = 0.5))
 
-
-
-
 ## Import
 
 df <- read.csv2("~/Documents/Stage/Data/baseScoreD.csv", stringsAsFactors=TRUE)
-df_origin <- df
+df_vaso <- read.csv2("~/Documents/Stage/Data/baseScoreD_2023.04.csv", stringsAsFactors=TRUE)
+df_vaso <- df_vaso[,c('clef','drogVasoD')]
 View(df)
 
 ## Conversion en facteurs
@@ -64,7 +69,19 @@ df_descr <- df # dataframe pour le tableau descriptif
 df_descr$is_valid <- (df$clef %in% df_valid$clef)*1 # colonne indicatrice de l'échantillon de validation
 df_descr$is_valid <- factor(df_descr$is_valid,labels = c("Apprentissage",'Validation'))
 df <- df[app,] # Echantillon d'apprentissage
+df <- merge(df,df_vaso,by='clef',all.x=T,all.y=F)
+df_valid <- merge(df_valid,df_vaso,by='clef',all.x=T,all.y=F)
 set.seed(NULL)
+
+df$drogVasoD <- factor(df$drogVasoD)
+df_valid$drogVasoD <- factor(df_valid$drogVasoD)
+
+df$nantes <- df$centre == 'divat nantes'
+df$montpellier <- df$centre == 'divat montpellier'
+df$nice <- df$centre == 'divat nice'
+df$nancy <- df$centre == 'divat nancy'
+df$lyon <- df$centre == 'divat lyon'
+df$sainte <- df$centre == 'divat saint etienne'
 
 #####################################################################################################################
 # VERIFICATION DE COHERENCE ET CRITERES D'INCLUSION
@@ -73,22 +90,22 @@ set.seed(NULL)
 ### Criteres d'inclusion - OK
 
 # Centres: Lyon, Montpellier, Nancy, Nantes, Nice, St-Etienne - OK
-table(df_origin$centre)
+table(df$centre)
 
 # Type de greffe: Rein - OK
-table(df_origin$typeG)
+table(df$typeG)
 
 # Date de greffe 01/01/2000 - 31/12/2022 - OK
-summary(df_origin$yearG)
+summary(df$yearG)
 
 # Première greffe uniquement - OK
-table(df_origin$rangG)
+table(df$rangG)
 
 # Receveur adulte - OK
-summary(df_origin$ageR)
+summary(df$ageR)
 
 # Donneur cadavérique - OK
-table(df_origin$typeD)
+table(df$typeD)
 
 
 
@@ -99,9 +116,6 @@ table(df_origin$typeD)
 
 
 # Valeurs cohérentes pour les var continues
-
-
-
 
 
 #####################################################################################################################
@@ -129,9 +143,8 @@ table(df$ecdscd)/nrow(df[!is.na(df$ecdscd),])
 hist(df$yearG,xlab='Ännée de greffe',ylab='Effectif',main='Ânnées de greffe',col='salmon4',breaks=20)
 
 
-
 #####################################################################################################################
-# ANALYSE DESCRIPTIVE
+# TABLE DESCRIPTIVE
 #####################################################################################################################
 
 ################## Préparation
@@ -148,7 +161,7 @@ var_list_descr_quali <- c('sexeR','malIni2cl','preemptive','perito','hemodial',
                           'anteDiab','anteDyslip','anteHTA','anteCardioVasc','anteNeo','anteUro',
                           'cmvR','AcHBsR','cmvD',
                           'sexeD','card_death','causeDCD2cl','htaD','diabD','arretD',
-                          'protuD','deplet','antiClassI.jour','antiClassII.jour','before_2008')
+                          'protuD','deplet','antiClassI.jour','antiClassII.jour','before_2008','drogVasoD')
 
 var_list_descr_quanti <- c('ageR','imcR','Tabm','Tdial','iscHeure','ageD','tailleD','poidsD',
                            'diureseD','ureeD','creatD','incompABDR')
@@ -156,7 +169,7 @@ var_list_descr <- c(var_list_descr_quanti,var_list_descr_quali)
 
 
 var_label_descr_quanti <- c('Recipient age (years)','Recipient BMI kg/m²','Time on waiting list (days)','Time on dialysis (days)','CIT (hours)',
-                     'Donor age (years)','Donor height (cm)','Donor weight (kg)','Last donor diuresis (mL)','Donor urea (mmol/L)','Donor creatinine (µmol/L)','HLA A-B-DR incompatibilities')
+                            'Donor age (years)','Donor height (cm)','Donor weight (kg)','Last donor diuresis (mL)','Donor urea (mmol/L)','Donor creatinine (µmol/L)','HLA A-B-DR incompatibilities')
 
 
 var_label_descr_quali <- c('Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis',
@@ -169,7 +182,7 @@ var_label_descr_quali <- c('Recipient men','Relapsing initial nephropathy','Pree
                            'Donor history of diabetes','Donor history of cardiac arrest',
                            'Donor proteinuria positive','Depleting induction therapy',
                            'Pre-transplantation anti-HLA immunization of class I',
-                           'Pre-transplantation anti-HLA immunization of class II','Transplanted before 2008')
+                           'Pre-transplantation anti-HLA immunization of class II','Transplanted before 2008','Donor treated by vasopressor')
 
 
 # fonction 1er et 2e quartiles
@@ -182,16 +195,16 @@ quart75 <- function(y) quantile(y,c(0.75),na.rm=T)
 # Liste de valeurs descriptives avant mise en forme QUANTITATIVE
 
 tab_quanti_unform <- data.frame(Variable=var_label_descr_quanti,
-                         Missing_learn=sapply(df[,var_list_descr_quanti], function(y) sum(length(which(is.na(y))))),
-                         mean_learn=round(sapply(df[,var_list_descr_quanti],mean,na.rm=T),1),
-                         sd_learn=round(sapply(df[,var_list_descr_quanti],sd,na.rm=T),1),
-                         q1_learn=round(sapply(df[,var_list_descr_quanti], quart25 ),1),
-                         q3_learn=round(sapply(df[,var_list_descr_quanti], quart75 ),1),
-                         Missing_valid=sapply(df_valid[,var_list_descr_quanti], function(y) sum(length(which(is.na(y))))),
-                         mean_valid=round(sapply(df_valid[,var_list_descr_quanti],mean,na.rm=T),1),
-                         sd_valid=round(sapply(df_valid[,var_list_descr_quanti],sd,na.rm=T),1),
-                         q1_valid=round(sapply(df_valid[,var_list_descr_quanti], quart25 ),1),
-                         q3_valid=round(sapply(df_valid[,var_list_descr_quanti], quart75 ),1)
+                                Missing_learn=sapply(df[,var_list_descr_quanti], function(y) sum(length(which(is.na(y))))),
+                                mean_learn=round(sapply(df[,var_list_descr_quanti],mean,na.rm=T),1),
+                                sd_learn=round(sapply(df[,var_list_descr_quanti],sd,na.rm=T),1),
+                                q1_learn=round(sapply(df[,var_list_descr_quanti], quart25 ),1),
+                                q3_learn=round(sapply(df[,var_list_descr_quanti], quart75 ),1),
+                                Missing_valid=sapply(df_valid[,var_list_descr_quanti], function(y) sum(length(which(is.na(y))))),
+                                mean_valid=round(sapply(df_valid[,var_list_descr_quanti],mean,na.rm=T),1),
+                                sd_valid=round(sapply(df_valid[,var_list_descr_quanti],sd,na.rm=T),1),
+                                q1_valid=round(sapply(df_valid[,var_list_descr_quanti], quart25 ),1),
+                                q3_valid=round(sapply(df_valid[,var_list_descr_quanti], quart75 ),1)
 ) 
 tab_quanti_unform
 
@@ -229,12 +242,12 @@ tab_quanti <- rbind(c('','','',''),tab_quanti) # Ligne vide pour les titres dans
 # Liste de valeurs descriptives avant mise en forme QUALITATIVE
 
 tab_quali_unform <- data.frame(Variable=var_label_descr_quali,
-                                Missing_learn=sapply(df[,var_list_descr_quali], function(y) sum(length(which(is.na(y))))),
-                                N_learn=sapply(df[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))),
-                                Percent_learn=round(sapply(df[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))/nrow(df)),4)*100,
-                                Missing_valid=sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(is.na(y))))),
-                                N_valid=sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))),
-                                Percent_valid=round(sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))/nrow(df_valid)),4)*100
+                               Missing_learn=sapply(df[,var_list_descr_quali], function(y) sum(length(which(is.na(y))))),
+                               N_learn=sapply(df[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))),
+                               Percent_learn=round(sapply(df[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))/nrow(df)),4)*100,
+                               Missing_valid=sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(is.na(y))))),
+                               N_valid=sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))),
+                               Percent_valid=round(sapply(df_valid[,var_list_descr_quali], function(y) sum(length(which(y==TRUE | y==1 | y=='ECD')))/nrow(df_valid)),4)*100
 ) 
 tab_quali_unform
 
@@ -290,10 +303,6 @@ table_descr_knit <- table_descr_knit %>%
 
 save_kable(table_descr_knit,file='/home/corentin/Documents/Stage/Projet R/Tables/Descriptif/tab_descr.pdf')
 
-
-## Casser le data frame d'origine en 2 pour séparer la table pour l'impression
-
-
 ################# Autres manipulations
 
 nrow(df[df$sexeR==0 & is.na(df$anteGrossess),])/nrow(df[df$sexeR==0,]) # Proportion de NA en antécédent de grossesse chez les femmes, échantillon d'apprentissage
@@ -309,6 +318,8 @@ nrow(df[df$ureeD<25 & !is.na(df$ureeD),])
 
 nrow(df[df$tacro==1 & df$yearG>2008,])/nrow(df[df$yearG>2008,]) # Tacrolimus après 2008
 
+table(df$centre)
+table(df_valid$centre)
 
 #####################################################################################################################
 # DESCRIPTION DE LA SURVIE
@@ -336,24 +347,24 @@ dftt <- data.frame(timelist=timelist,probsurv=probsurv,label=c("78.2%","55.8%","
 
 # Graphique
 pglob <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
-                      risk.table.y.text.col = T,
-                      risk.table.y.text = FALSE,
-                      linetype = c("solid"),
-                      risk.table = T,
-                      title = "Courbe de survie globale",
-                      risk.table.title = 'Effectif à risque',
-                      xlab = "Temps post-greffe (Années)",
-                      ylab = "Probabilité de survie",
-                      xlim = c(0, as.integer(max(df$TpsEvtYear))+1),
-                      ylim = c(0,1),
-                      censor = F,
-                      surv.scale = "default",
-                      fontsize = 3,
-                      tables.theme = theme_light(),
-                      break.time.by = 1,
-                      risk.table.height=0.3,
-                      conf.int = T,
-                      legend.labs=c('Global'))
+                    risk.table.y.text.col = T,
+                    risk.table.y.text = FALSE,
+                    linetype = c("solid"),
+                    risk.table = T,
+                    title = "Courbe de survie globale",
+                    risk.table.title = 'Effectif à risque',
+                    xlab = "Temps post-greffe (Années)",
+                    ylab = "Probabilité de survie",
+                    xlim = c(0, as.integer(max(df$TpsEvtYear))+1),
+                    ylim = c(0,1),
+                    censor = F,
+                    surv.scale = "default",
+                    fontsize = 3,
+                    tables.theme = theme_light(),
+                    break.time.by = 1,
+                    risk.table.height=0.3,
+                    conf.int = T,
+                    legend.labs=c('Global'))
 
 
 ppglob <- pglob$plot + geom_point(aes(x=timelist, y=probsurv), data = dftt) + geom_text_repel(aes(x=timelist, y=probsurv,label=label),vjust= -2, data = dftt) +
@@ -391,24 +402,24 @@ dftt <- data.frame(timelist=timelist,probsurv=probsurv,label=c('76.0%','33.1%','
 
 # Graphique
 pcentre <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
-                 risk.table.y.text.col = T,
-                 risk.table.y.text = FALSE,
-                 linetype = c("solid", "solid","solid","solid","solid","solid"),
-                 risk.table = T,
-                 title = "Courbe de survie",
-                 risk.table.title = 'Effectif à risque',
-                 xlab = "Temps post-greffe (Années)",
-                 ylab = "Probabilité de survie",
-                 xlim = c(0, as.integer(max(df$TpsEvtYear))+1),
-                 ylim = c(0,1),
-                 censor = F,
-                 surv.scale = "default",
-                 fontsize = 3,
-                 tables.theme = theme_light(),
-                 break.time.by = 1,
-                 risk.table.height=0.3,
-                 conf.int = F,
-                 legend.labs=c('Lyon','Montpellier','Nancy','Nantes','Nice','St-Etienne'))
+                      risk.table.y.text.col = T,
+                      risk.table.y.text = FALSE,
+                      linetype = c("solid", "solid","solid","solid","solid","solid"),
+                      risk.table = T,
+                      title = "Courbe de survie",
+                      risk.table.title = 'Effectif à risque',
+                      xlab = "Temps post-greffe (Années)",
+                      ylab = "Probabilité de survie",
+                      xlim = c(0, as.integer(max(df$TpsEvtYear))+1),
+                      ylim = c(0,1),
+                      censor = F,
+                      surv.scale = "default",
+                      fontsize = 3,
+                      tables.theme = theme_light(),
+                      break.time.by = 1,
+                      risk.table.height=0.3,
+                      conf.int = F,
+                      legend.labs=c('Lyon','Montpellier','Nancy','Nantes','Nice','St-Etienne'))
 
 ppcentre <- pcentre$plot + geom_point(aes(x=timelist, y=probsurv), data = dftt) + geom_text_repel(aes(x=timelist, y=probsurv,label=label),vjust= -2, data = dftt) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -423,6 +434,260 @@ grid.arrange(
                         c(1, 1),
                         c(2, 2),
                         c(2, 2)))
+
+
+################## Kaplan-Meier tronqués
+
+## St-Etienne
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$sainte==1,])
+
+# Graphique
+pcentre1 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                      risk.table.y.text.col = T,
+                      risk.table.y.text = FALSE,
+                      linetype = c("solid"),
+                      risk.table = T,
+                      title = "Courbe de survie",
+                      risk.table.title = 'Effectif à risque',
+                      xlab = "Temps post-greffe (Années)",
+                      ylab = "Probabilité de survie",
+                      xlim = c(0,1),
+                      ylim = c(0,1),
+                      censor = F,
+                      surv.scale = "default",
+                      fontsize = 3,
+                      tables.theme = theme_light(),
+                      break.time.by = 0.2,
+                      risk.table.height=0.3,
+                      conf.int = F,
+                      legend.labs=c('St-Etienne'))
+
+ppcentre1 <- pcentre1$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre1 <- pcentre1$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre1,ptcentre1),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+## Nice
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$nice==1,])
+
+# Graphique
+pcentre2 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                       risk.table.y.text.col = T,
+                       risk.table.y.text = FALSE,
+                       linetype = c("solid"),
+                       risk.table = T,
+                       title = "Courbe de survie",
+                       risk.table.title = 'Effectif à risque',
+                       xlab = "Temps post-greffe (Années)",
+                       ylab = "Probabilité de survie",
+                       xlim = c(0,4),
+                       ylim = c(0,1),
+                       censor = F,
+                       surv.scale = "default",
+                       fontsize = 3,
+                       tables.theme = theme_light(),
+                       break.time.by = 0.5,
+                       risk.table.height=0.3,
+                       conf.int = F,
+                       legend.labs=c('Nice'))
+
+ppcentre2 <- pcentre2$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre2 <- pcentre2$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre2,ptcentre2),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+## Nantes
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$nantes==1,])
+
+# Graphique
+pcentre3 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                       risk.table.y.text.col = T,
+                       risk.table.y.text = FALSE,
+                       linetype = c("solid"),
+                       risk.table = T,
+                       title = "Courbe de survie",
+                       risk.table.title = 'Effectif à risque',
+                       xlab = "Temps post-greffe (Années)",
+                       ylab = "Probabilité de survie",
+                       xlim = c(0,19.5),
+                       ylim = c(0,1),
+                       censor = F,
+                       surv.scale = "default",
+                       fontsize = 3,
+                       tables.theme = theme_light(),
+                       break.time.by = 1,
+                       risk.table.height=0.3,
+                       conf.int = F,
+                       legend.labs=c('Nantes'))
+
+ppcentre3 <- pcentre3$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre3 <- pcentre3$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre3,ptcentre3),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+## Nancy
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$nancy==1,])
+
+# Graphique
+pcentre4 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                       risk.table.y.text.col = T,
+                       risk.table.y.text = FALSE,
+                       linetype = c("solid"),
+                       risk.table = T,
+                       title = "Courbe de survie",
+                       risk.table.title = 'Effectif à risque',
+                       xlab = "Temps post-greffe (Années)",
+                       ylab = "Probabilité de survie",
+                       xlim = c(0,19.5),
+                       ylim = c(0,1),
+                       censor = F,
+                       surv.scale = "default",
+                       fontsize = 3,
+                       tables.theme = theme_light(),
+                       break.time.by = 1,
+                       risk.table.height=0.3,
+                       conf.int = F,
+                       legend.labs=c('Nancy'))
+
+ppcentre4 <- pcentre4$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre4 <- pcentre4$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre4,ptcentre4),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+## Montpellier
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$montpellier==1,])
+
+# Graphique
+pcentre5 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                       risk.table.y.text.col = T,
+                       risk.table.y.text = FALSE,
+                       linetype = c("solid"),
+                       risk.table = T,
+                       title = "Courbe de survie",
+                       risk.table.title = 'Effectif à risque',
+                       xlab = "Temps post-greffe (Années)",
+                       ylab = "Probabilité de survie",
+                       xlim = c(0,19.5),
+                       ylim = c(0,1),
+                       censor = F,
+                       surv.scale = "default",
+                       fontsize = 3,
+                       tables.theme = theme_light(),
+                       break.time.by = 1,
+                       risk.table.height=0.3,
+                       conf.int = F,
+                       legend.labs=c('Montpellier'))
+
+ppcentre5 <- pcentre5$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre5 <- pcentre5$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre5,ptcentre5),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+## Lyon
+
+# Objet survie
+Obj.Surv<-survfit(Surv(TpsEvtYear, Evt) ~ 1, data = df[df$lyon==1,])
+
+# Graphique
+pcentre6 <- ggsurvplot(fit = Obj.Surv, data = df, pval = F, 
+                       risk.table.y.text.col = T,
+                       risk.table.y.text = FALSE,
+                       linetype = c("solid"),
+                       risk.table = T,
+                       title = "Courbe de survie",
+                       risk.table.title = 'Effectif à risque',
+                       xlab = "Temps post-greffe (Années)",
+                       ylab = "Probabilité de survie",
+                       xlim = c(0,7.5),
+                       ylim = c(0,1),
+                       censor = F,
+                       surv.scale = "default",
+                       fontsize = 3,
+                       tables.theme = theme_light(),
+                       break.time.by = 1,
+                       risk.table.height=0.3,
+                       conf.int = F,
+                       legend.labs=c('Lyon'))
+
+ppcentre6 <- pcentre6$plot + 
+  theme(plot.title = element_text(hjust = 0.5))
+ptcentre6 <- pcentre6$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+grid.arrange(
+  grobs = list(ppcentre6,ptcentre6),
+  layout_matrix = rbind(c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(1, 1),
+                        c(2, 2),
+                        c(2, 2)))
+
+
+
+
+
+
 
 
 ################## Indicateurs descriptifs
@@ -507,24 +772,25 @@ sink(file = NULL)
 # 20 ans: 25% [21%-29%] 
 
 
+
 #####################################################################################################################
-# REGRESSION DONNEUR / RECEVEUR
+# SCREENING UNIVARIE DES INTERACTIONS
 #####################################################################################################################
 
 ################## Listes variables
 
 # Quantitatif
 var_univ_donneur_quanti <- c('ageD','tailleD','poidsD','diureseD','ureeD','creatD')
-  
+
 var_univ_receveur_quanti <- c('ageR','imcR')
 
-var_univ_greffe_quanti <- c('incompABDR','Tdial','Tabm')
+var_univ_greffe_quanti <- c('iscHeure','incompABDR','Tdial','Tabm')
 
 
 # Qualitatif
 var_univ_donneur_quali <- c('sexeD','card_death','causeDCD2cl','htaD','diabD','arretD','protuD','cmvD')
 
-var_univ_receveur_quali <- c('sexeR','malIni2cl','preemptive','perito','hemodial','tabac','anteDiab','anteDyslip',
+var_univ_receveur_quali <- c('sexeR','malIni2cl','preemptive','perito','hemodial','anteDiab','anteDyslip',
                              'anteHTA','anteCardioVasc','anteNeo','anteUro','cmvR','AcHBsR',
                              'antiClassI.jour','antiClassII.jour')
 
@@ -540,7 +806,7 @@ colnames(dr_univ_quanti) <- c('Donor age','Donor height','Donor weight','Last do
 # Donneur - greffe
 dg_univ_quanti <- round(sapply(df[,var_univ_donneur_quanti],function(x) sapply(df[,var_univ_greffe_quanti],function(y) summary(lm(x~y))$coefficients[8])),3)
 colnames(dg_univ_quanti) <- c('Donor age','Donor height','Donor weight','Last donor diuresis','Donor urea','Donor creatinine')
-rownames(dg_univ_quanti) <- c('HLA A-B-DR incompatibilities','Time on dialysis','Time on waiting list')
+rownames(dg_univ_quanti) <- c('CIT','HLA A-B-DR incompatibilities','Time on dialysis','Time on waiting list')
 
 
 # Sauvegarde en PDF
@@ -559,7 +825,7 @@ dg_univ_quanti %>%
 # Donneur Quanti - Receveur Quali
 dr_univ_quanti_quali <- round(sapply(df[,var_univ_donneur_quanti],function(x) sapply(df[,var_univ_receveur_quali],function(y) summary(lm(x~y))$coefficients[8])),3)
 colnames(dr_univ_quanti_quali) <- c('Donor age','Donor height','Donor weight','Last donor diuresis','Donor urea','Donor creatinine')
-rownames(dr_univ_quanti_quali) <- c('Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis','History of smoking',
+rownames(dr_univ_quanti_quali) <- c('Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis',
                                     'History of diabetes','History of Dyslipidemia','History of hypertension',
                                     'History of cardiovascular disease','History of neoplasia','History of urological disease',
                                     'Positive recipient CMV serology','Positive recipient AcHBs serology','Pre-transplantation anti-HLA immunization of class I',
@@ -574,7 +840,7 @@ rownames(rd_univ_quanti_quali) <- c('Donor men','Donor after cardiac death','Don
 
 # Donneur Quali - Greffe Quanti
 gd_univ_quanti_quali <- round(sapply(df[,var_univ_greffe_quanti],function(x) sapply(df[,var_univ_donneur_quali],function(y) summary(lm(x~y))$coefficients[8])),3)
-colnames(gd_univ_quanti_quali) <- c('HLA A-B-DR incompatibilities','Time on dialysis','Time on waiting list')
+colnames(gd_univ_quanti_quali) <- c('CIT','HLA A-B-DR incompatibilities','Time on dialysis','Time on waiting list')
 rownames(gd_univ_quanti_quali) <- c('Donor men','Donor after cardiac death','Donor death vascular etiology',
                                     'Donor history of hypertension','Donor history of diabetes',
                                     'Donor history of cardiac arrest','Donor proteinuria positive','Donor CMV serology positive')
@@ -600,13 +866,13 @@ gd_univ_quanti_quali %>%
 # Donneur - Receveur
 dr_univ_quali <- round(sapply(df[,var_univ_donneur_quali],function(x) sapply(df[,var_univ_receveur_quali],function(y) chisq.test(table(x,y))$p.value)),3)
 colnames(dr_univ_quali) <- c('Donor men','Donor after cardiac death','Donor death vascular etiology',
-                                    'Donor history of hypertension','Donor history of diabetes',
-                                    'Donor history of cardiac arrest','Donor proteinuria positive','Donor CMV serology positive')
-rownames(dr_univ_quali) <- c('Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis','History of smoking',
-                                    'History of diabetes','History of Dyslipidemia','History of hypertension',
-                                    'History of cardiovascular disease','History of neoplasia','History of urological disease',
-                                    'Positive recipient CMV serology','Positive recipient AcHBs serology','Pre-transplantation anti-HLA immunization of class I',
-                                    'Pre-transplantation anti-HLA immunization of class II')
+                             'Donor history of hypertension','Donor history of diabetes',
+                             'Donor history of cardiac arrest','Donor proteinuria positive','Donor CMV serology positive')
+rownames(dr_univ_quali) <- c('Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis',
+                             'History of diabetes','History of Dyslipidemia','History of hypertension',
+                             'History of cardiovascular disease','History of neoplasia','History of urological disease',
+                             'Positive recipient CMV serology','Positive recipient AcHBs serology','Pre-transplantation anti-HLA immunization of class I',
+                             'Pre-transplantation anti-HLA immunization of class II')
 
 
 # Sauvegarde en PDF
@@ -616,60 +882,385 @@ dr_univ_quali %>%
 
 
 #####################################################################################################################
-# SELECTION VARIABLES RECEVEUR
+# SELECTION VARIABLES DONNEUR
 #####################################################################################################################
 
-################## Sélection univariée
+#################################### Table univariée
 
-
-# Variables
+var_donneur <- c(var_univ_donneur_quanti,var_univ_donneur_quali,'imcD')
+var_greffe <- c('iscHeure','Tdial','Tabm','incomp2cl')
 var_receveur <- c(var_univ_receveur_quanti,var_univ_receveur_quali)
 
+var_all <- c(var_receveur,var_greffe,var_donneur)
+
+
 # Génération de la table
-tab_univ_receveur <- round(sapply(df[,var_receveur],function(x) summary(coxph(Surv(df$TpsEvtYear,df$Evt)~x))$coefficients),3)
-tab_univ_receveur <- t(tab_univ_receveur)
-colnames(tab_univ_receveur) <- c('\\beta','HR','SE(\\beta)','Z','p')
-rownames(tab_univ_receveur) <- c('Recipient Age','Recipient BMI','Recipient men','Relapsing initial nephropathy','Preemptive transplantation','Peritoneal dialysis','Hemodialysis','History of smoking',
-                                 'History of diabetes','History of Dyslipidemia','History of hypertension',
-                                 'History of cardiovascular disease','History of neoplasia','History of urological disease',
-                                 'Positive recipient CMV serology','Positive recipient AcHBs serology','anti-HLA immunization of class I',
-                                 'anti-HLA immunization of class II')
-
-
+tab_back_glob <- round(sapply(df[,var_all],function(x) summary(coxph(Surv(df$TpsEvtYear,df$Evt)~x))$coefficients),3)
+tab_back_glob <- t(tab_back_glob)
+colnames(tab_back_glob) <- c('\\beta','HR','SE(\\beta)','Z','p')
 
 # Export en PDF
 
-tab_univ_receveur %>%
+tab_back_glob %>%
   kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_univ_receveur.pdf')
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2/Univarié/table_univarie_globale.pdf')
 
 
+#################################### Hypothèses
 
-# Construction du modèle de base
-
-model_receveur <- coxph(Surv(TpsEvtYear, Evt) ~ 
-             # Variables du receveur
-             ageR + imcR + sexeR + malIni2cl + techEpu3cl +
-             anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac
-            ,data = df)
-summary(model_receveur) 
-
-
+## Fonction log-log
+log.minus.log<-function(y) { 
+  log(-log(y)) 
+}
 
 
 ################## Log-linéarité
 
-## Age receveur -- Passer au carré ?
-df$ageR2 <- df$ageR**2
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~ageR+log(ageR)+sqrt(ageR)+ageR2,data=df)
-ggcoxfunctional(mart_res_null, data = df)
+## Age donneur -- OK
+q25 <- quantile(df$ageD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$ageD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~ageD,data=df[df$ageD>q25 & df$ageD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$ageD>q25 & df$ageD<q975 & !is.na(df$ageD),]$ageD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Age Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+## Taille Donneur -- OK
+q25 <- quantile(df$tailleD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$tailleD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~tailleD,data=df[df$tailleD>q25 & df$tailleD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$tailleD>q25 & df$tailleD<q975 & !is.na(df$tailleD),]$tailleD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Taille Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+## Poids Donneur -- OK
+q25 <- quantile(df$poidsD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$poidsD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~poidsD,data=df[df$poidsD>q25 & df$poidsD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$poidsD>q25 & df$poidsD<q975 & !is.na(df$poidsD),]$poidsD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Poids Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+## IMC -- Transfo
+q25 <- quantile(df$imcD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$imcD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~imcD,data=df[df$imcD>q25 & df$imcD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$imcD>q25 & df$imcD<q975 & !is.na(df$imcD),]$imcD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "IMC Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+
+
+## Diurese -- OK
+q25 <- quantile(df$diureseD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$diureseD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~diureseD,data=df[df$diureseD>q25 & df$diureseD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$diureseD>q25 & df$diureseD<q975 & !is.na(df$diureseD),]$diureseD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Diurese Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+
+
+## Uree -- OK
+q25 <- quantile(df$ureeD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$ureeD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~ureeD,data=df[df$ureeD>q25 & df$ureeD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$ureeD>q25 & df$ureeD<q975 & !is.na(df$ureeD),]$ureeD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Diurese Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+
+
+
+## Creat -- OK
+q25 <- quantile(df$creatD,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$creatD,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~creatD,data=df[df$creatD>q25 & df$creatD<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$creatD>q25 & df$creatD<q975 & !is.na(df$creatD),]$creatD, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Diurese Donneur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+################## Proportionnalité des risques
+
+## résidus de Schoenfeld 
+par(mfrow=c(4,4))
+
+list_plot_schoen <- lapply(var_donneur, function(x) {plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) ),col=c(1,2,2,2)) 
+  abline(h=0,col=4)})
+
+# Saint-etienne card_death ?
+plot(main='card_death',cox.zph(coxph(Surv(df[df$sainte==0,]$TpsEvtYear,df[df$sainte==0,]$Evt)~df[df$sainte==0,'card_death']) ))
+
+
+## plots log-log QUALI
+
+par(mfrow=c(3,3))
+
+list_plot_loglog <- lapply(var_donneur[7:14], function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                               xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+par(mfrow=c(1,1))
+
+
+
+#################################### Modèle de base
+
+model_donneur <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                          # Variables du donneur
+                          ageD + ureeD + creatD + sexeD + card_death + causeDCD2cl + htaD + diabD + 
+                          arretD + cmvD + imcD
+                        ,data = df)
+summary(model_donneur)
+
+
+#################################### Stepwise
+
+var_donneur_univ <- c('ageD','ureeD','creatD','sexeD','card_death','causeDCD2cl','htaD','diabD','arretD',
+                      'cmvD','tailleD','poidsD')
+
+stepdat <- na.omit(df[,c(var_donneur_univ,'TpsEvtYear','Evt')])
+
+stepwiseCox(Surv(stepdat$TpsEvtYear, stepdat$Evt) ~ 
+              # Variables du donneur
+              ageD + ureeD + creatD + sexeD + card_death + causeDCD2cl + htaD + diabD + 
+              arretD + cmvD + tailleD + poidsD,
+            selection='backward',
+            select='SL',
+            sls=0.05,
+            sle=0.05,
+            data=stepdat)
+
+######### Modèle retenu
+
+model_donneur <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                          # Variables du donneur
+                          ageD + card_death + causeDCD2cl +
+                          cmvD + tailleD + poidsD
+                        ,data = stepdat)
+summary(model_donneur) 
+
+model_donneur_df <- as.data.frame(tidy(model_donneur))
+model_donneur_df$hr <- exp(model_donneur_df$estimate)
+model_donneur_df <- model_donneur_df[c(2,6,3:5)]
+rownames(model_donneur_df) <- c('Donor age','Donor after cardiac death',
+                                 'Donor death vascular etiology',
+                                 'Positive Donor CMV serology','Donor height','Donor weight')
+colnames(model_donneur_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
+
+model_donneur_df %>%
+  kable("latex", booktabs = T, escape = F) %>%
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2/Donneur/modele_final_donneur_step.pdf')
+
+
+
+
+
+#####################################################################################################################
+# SELECTION VARIABLES GREFFE
+#####################################################################################################################
+
+################## Log-linéarité
+
+## CIT -- OK
+q25 <- quantile(df$iscHeure,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$iscHeure,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~iscHeure,data=df[df$iscHeure>q25 & df$iscHeure<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$iscHeure>q25 & df$iscHeure<q975 & !is.na(df$iscHeure),]$iscHeure, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "CIT - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+## Temps liste -- OK
+q25 <- quantile(df$Tabm,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$Tabm,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~Tabm,data=df[df$Tabm>q25 & df$Tabm<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$Tabm>q25 & df$Tabm<q975 & !is.na(df$Tabm),]$Tabm, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Temps sur liste - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+## Temps dialyse -- OK
+q25 <- quantile(df$Tdial,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$Tdial,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~Tdial,data=df[df$Tdial>q25 & df$Tdial<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$Tdial>q25 & df$Tdial<q975 & !is.na(df$Tdial),]$Tdial, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Temps en dialyse - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
+
+
+################## Proportionnalité des risques
+
+## résidus de Schoenfeld 
+par(mfrow=c(2,3))
+
+list_plot_schoen <- lapply(var_greffe, function(x) {plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) ),col=c(1,2,2,2)) 
+  abline(h=0,col=4)})
+
+
+## plots log-log QUALI
+
+par(mfrow=c(1,1))
+
+list_plot_loglog <- lapply(c('incomp2cl'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                            xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+#################################### Stepwise
+
+var_greffe_univ <- c('Tdial','Tabm','incomp2cl')
+var_donneur_univ2 <- c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD')
+
+stepdat <- na.omit(df[,c(var_donneur_univ2,var_greffe_univ,'TpsEvtYear','Evt')])
+stepwiseCox(Surv(stepdat$TpsEvtYear, stepdat$Evt) ~ 
+              # Variables du donneur
+              ageD + card_death + causeDCD2cl + cmvD + tailleD + poidsD +
+              # Variables greffe
+              Tdial + incomp2cl + Tabm,
+            selection='backward',
+            sls=0.05,
+            sle=0.05,
+            include=c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD'),
+            data=stepdat)
+
+
+#################################### Modèle retenu
+
+model_greffe <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                         # Variables du donneur
+                         ageD + card_death + causeDCD2cl +
+                         cmvD + tailleD + poidsD +
+                         # Variables de la greffe
+                         incomp2cl + Tdial
+                       ,data = stepdat)
+summary(model_greffe) 
+
+model_greffe_df <- as.data.frame(tidy(model_greffe))
+model_greffe_df$hr <- exp(model_greffe_df$estimate)
+model_greffe_df <- model_greffe_df[c(2,6,3:5)]
+rownames(model_greffe_df) <- c('Donor age','Donor after cardiac death',
+                                'Donor death vascular etiology',
+                                'Positive Donor CMV serology','Donor height',
+                                'Donor weight','HLA incompatibilities >=4','Time on dialysis')
+colnames(model_greffe_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
+
+model_greffe_df %>%
+  kable("latex", booktabs = T, escape = F) %>%
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2/Greffe/modele_final_greffe_step.pdf')
+
+
+
+
+#####################################################################################################################
+# SELECTION VARIABLES RECEVEUR
+#####################################################################################################################
+
+
+################## Log-linéarité
+
+## Age receveur -- OK
+
+q25 <- quantile(df$ageR,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$ageR,c(0,0.975,1),na.rm=T)[2]
+
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~ageR,data=df[df$ageR>q25 & df$ageR<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$ageR>q25 & df$ageR<q975 & !is.na(df$ageR),]$ageR, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Age receveur - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
 
 
 ## IMC receveur -- OK
-df$imcR2 <- df$imcR**2
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~imcR+log(imcR)+sqrt(imcR)+imcR2,data=df[!is.na(df$imcR),])
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$imcR),])
+q25 <- quantile(df$imcR,c(0,0.025,1),na.rm=T)[2]
+q975 <- quantile(df$imcR,c(0,0.975,1),na.rm=T)[2]
 
+mart_res_null <- residuals(coxph(Surv(TpsEvtYear,Evt)~imcR,data=df[df$imcR>q25 & df$imcR<q975,]),type="martingale")
+
+ggplot(mapping = aes(x = df[df$imcR>q25 & df$imcR<q975 & !is.na(df$imcR),]$imcR, y = mart_res_null)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "IMC - Log linéaire") +
+  xlab('') +
+  ylab('') +
+  theme_bw() + theme(legend.key = element_blank()) + theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.title.x = element_text(size = 8),axis.title.y = element_text(size = 8))# Log linéarité parfaite
 
 ################## Proportionnalité des risques
 
@@ -683,332 +1274,1334 @@ log.minus.log<-function(y) {
 
 par(mfrow=c(4,4))
 
-list_plot_loglog <- lapply(c(var_univ_receveur_quali,'tabac'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
-                                                                          xlab="Temps post  sortie (jours)", mark.time=FALSE))
+list_plot_loglog <- lapply(c(var_univ_receveur_quali), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                                        xlab="Temps post  sortie (jours)", mark.time=FALSE))
 
 
 ## résidus de Schoenfeld 
 par(mfrow=c(5,4))
 
-list_plot_schoen <- lapply(var_receveur, function(x) plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) )))
+list_plot_schoen <- lapply(var_receveur, function(x) {plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) ),col=c(1,2,2,2)) 
+  abline(h=0,col=4)})
+
+#################################### Stepwise
+
+var_greffe_univ2 <- c('Tdial','incomp2cl')
+var_donneur_univ2 <- c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD')
+var_rec_univ <- c('ageR','imcR','sexeR','malIni2cl','hemodial','anteDiab','anteDyslip',
+                  'anteHTA','anteCardioVasc','anteNeo','cmvR','AcHBsR')
 
 
+stepdat <- na.omit(df[,c(var_donneur_univ2,var_greffe_univ2,var_rec_univ,'TpsEvtYear','Evt')])
+stepwiseCox(Surv(stepdat$TpsEvtYear, stepdat$Evt) ~ 
+              # Variables du donneur
+              ageD + card_death + causeDCD2cl + cmvD + tailleD + poidsD +
+              # Variables greffe
+              Tdial + incomp2cl +
+              # Variables du receveur
+              ageR + imcR + sexeR + malIni2cl + hemodial + anteDiab + anteDyslip + anteHTA + 
+              anteCardioVasc + anteNeo + cmvR + AcHBsR,
+            selection='backward',
+            sls=0.05,
+            sle=0.05,
+            include=c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD','Tdial','incomp2cl'),
+            data=stepdat)
 
 
-################## Modèle retenu
-
-# Construction du modèle de base
+#################################### Modèle retenu
 
 model_receveur <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                          # Variables du receveur
-                          ageR + imcR2 + sexeR + malIni2cl + techEpu3cl +
-                          anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac
-                        ,data = df)
+                        # Variables du donneur
+                        ageD + card_death + causeDCD2cl +
+                        cmvD + tailleD + poidsD +
+                        # Variables de la greffe
+                        incomp2cl + Tdial +
+                        # Variables du receveur
+                        ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl
+                      ,data = stepdat)
 summary(model_receveur) 
-
-# Export du modèle de base en pdf
 
 model_receveur_df <- as.data.frame(tidy(model_receveur))
 model_receveur_df$hr <- exp(model_receveur_df$estimate)
 model_receveur_df <- model_receveur_df[c(2,6,3:5)]
-rownames(model_receveur_df) <- c('Recipient Age','Recipient BMI (squared)','Recipient men','Relapsing initial nephropathy','Peritoneal dialysis','Hemodialysis',
-                                 'History of diabetes','History of Dyslipidemia','History of hypertension',
-                                 'History of cardiovascular disease','History of neoplasia',
-                                 'Positive recipient CMV serology','Positive recipient AcHBs serology','History of smoking')
+rownames(model_receveur_df) <- c('Donor age','Donor after cardiac death',
+                               'Donor death vascular etiology',
+                               'Positive Donor CMV serology','Donor height',
+                               'Donor weight','HLA incompatibilities >=4','Time on dialysis',
+                               'Recipient age','History of diabetes','History of cardiovascular disease',
+                               'Hemodialysis','History of neoplasia','Relapsing initial nephropathy')
 colnames(model_receveur_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
 
 model_receveur_df %>%
   kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_mod_receveur.pdf')
-
-
-
-#####################################################################################################################
-# SELECTION VARIABLES GREFFE
-#####################################################################################################################
-
-################## Sélection univariée
-
-# Variables
-var_greffe <- c('iscHeure','Tdial','Tabm','incompABDR','before_2008')
-
-# Génération de la table
-tab_univ_greffe <- round(sapply(df[,var_greffe],function(x) summary(coxph(Surv(df$TpsEvtYear,df$Evt)~df$ageR + df$imcR2 + df$sexeR + df$malIni2cl + df$techEpu3cl +
-                                                                              df$anteDiab + df$anteDyslip + df$anteHTA + df$anteCardioVasc + df$anteNeo + df$cmvR + df$AcHBsR + df$tabac + x))$coefficients[15,]),4)
-
-# Centre ?
-mcentre <- coxph(Surv(df$TpsEvtYear,df$Evt)~df$ageR + df$imcR2 + df$sexeR + df$malIni2cl + df$techEpu3cl +
-        df$anteDiab + df$anteDyslip + df$anteHTA + df$anteCardioVasc + df$anteNeo + df$cmvR + df$AcHBsR + df$tabac + df$centre)
-lrtest(mcentre,model_receveur)
-pcentre <- as.numeric(lrtest(mcentre,model_receveur)[2,5])
-
-# Mise en forme
-tab_univ_greffe <- as.data.frame(t(tab_univ_greffe))
-tab_univ_greffe <- rbind(tab_univ_greffe, c(rep('',4),round(pcentre,4)))
-colnames(tab_univ_greffe) <- c('\\beta','HR','SE(\\beta)','Z','p')
-rownames(tab_univ_greffe) <- c('CIT','Time on dialysis','Time on waiting list','HLA AB-D-R incompatibilities','Transplanted before 2008','Centre')
-
-
-# Export en PDF
-
-tab_univ_greffe %>%
-  kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_univ_greffe.pdf')
-
-
-
-# Construction du modèle enrichi
-
-model_receveur_greffe <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                          # Variables du receveur
-                          ageR + imcR + sexeR + malIni2cl + hemodial +
-                          anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac +
-                          # Variables de la greffe
-                          Tabm + Tdial + incompABDR + before_2008 + centre
-                        ,data = df)
-summary(model_receveur_greffe) 
-
-
-################## Log-linéarité
-
-## Temps dialyse -- Passer à la racine carrée
-df$Tdial2 <- df$Tdial**2
-df$Tdiallog <- log(1+df$Tdial)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~Tdial+sqrt(Tdial)+Tdial2+Tdiallog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$Tdial),])
-
-
-## Temps liste -- OK
-df$Tabm2 <- df$Tabm**2
-df$Tabmlog <- log(1+df$Tabm)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~Tabm+sqrt(Tabm)+Tabm2+Tabmlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$Tabm),])
-
-## incompABDR -- OK
-df$ABDR2 <- df$incompABDR**2
-df$ABDRlog <- log(1+df$incompABDR)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~incompABDR+sqrt(incompABDR)+ABDR2+ABDRlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$incompABDR),])
-
-## CIT -- log ?
-df$CIT2 <- df$iscHeure**2
-df$CITlog <- log(df$iscHeure)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~iscHeure+sqrt(iscHeure)+CIT2+CITlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$iscHeure),])
-coxph(Surv(TpsEvtYear,Evt)~CITlog,data=df) # pas signif
-
-
-################## Proportionnalité des risques
-
-## résidus de Schoenfeld 
-par(mfrow=c(2,3))
-
-list_plot_schoen <- lapply(c(var_univ_greffe_quanti,'before_2008','centre'), function(x) plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) )))
-
-
-## plots log-log QUALI
-
-par(mfrow=c(1,2))
-
-list_plot_loglog <- lapply(c('before_2008','centre'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
-                                                                     xlab="Temps post  sortie (jours)", mark.time=FALSE))
-par(mfrow=c(1,1))
-
-
-################## Modèle retenu
-
-# Construction du modèle de base
-
-model_greffe <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                          # Variables du receveur
-                          ageR + imcR2 + sexeR + malIni2cl + hemodial #3cl non convergent
-                          + anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac +
-                          # Variables de la greffe 
-                          sqrt(Tdial) + Tabm + incompABDR + before_2008 + strata(centre)
-                        ,data = df)
-summary(model_greffe) 
-
-# Export du modèle de base en pdf
-
-model_greffe_df <- as.data.frame(tidy(model_greffe))
-model_greffe_df$hr <- exp(model_greffe_df$estimate)
-model_greffe_df <- model_greffe_df[c(2,6,3:5)]
-rownames(model_greffe_df) <- c('Recipient Age','Recipient BMI (squared)','Recipient men','Relapsing initial nephropathy','Hemodialysis',
-                                 'History of diabetes','History of Dyslipidemia','History of hypertension',
-                                 'History of cardiovascular disease','History of neoplasia',
-                                 'Positive recipient CMV serology','Positive recipient AcHBs serology','History of smoking','Time on dialysis (sqrt)',
-                                 'Time on waiting list','HLA A-B-DR incompatibilities','Transplanted before 2008')
-colnames(model_greffe_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
-
-model_greffe_df %>%
-  kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_mod_greffe.pdf')
-
-
-
-
-
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2/Receveur/modele_final_receveur_step.pdf')
 
 
 #####################################################################################################################
-# SELECTION VARIABLES DONNEUR
+# INTERACTIONS ENTRE VARIABLES SIGNIFICATIVES
 #####################################################################################################################
 
-################## Sélection univariée
 
-# Variables
-var_donneur <- c(var_univ_donneur_quanti,var_univ_donneur_quali,'imcD')
+####################################  Liste des candidates
+inter_signif2 <- c('incomp2cl:ageD',
+                   'ageD:ageR',
+                   'hemodial:ageD','anteDiab:ageD',
+                   'anteCardioVasc:ageD',
+                   'anteNeo:ageD',
+                   'malIni2cl:ageD',
+                   'ageD:Tdial',
+                   'incomp2cl:card_death',
+                   'hemodial:card_death',
+                   'anteCardioVasc:card_death',
+                   'ageR:causeDCD2cl',
+                   'hemodial:causeDCD2cl','anteDiab:causeDCD2cl',
+                   'anteCardioVasc:causeDCD2cl','anteNeo:causeDCD2cl',
+                   'malIni2cl:causeDCD2cl',
+                   'cmvD:hemodial','cmvD:anteDiab','cmvD:ageR',
+                   'tailleD:hemodial','tailleD:anteCardioVasc','tailleD:anteNeo','tailleD:ageR',
+                   'poidsD:hemodial','poidsD:malIni2cl','poidsD:ageR'
+)
 
-# Génération de la table
-tab_univ_donneur <- round(sapply(df[,var_donneur],function(x) summary(coxph(Surv(df$TpsEvtYear,df$Evt)~df$ageR + df$imcR2 + df$sexeR + df$malIni2cl + df$hemodial +
-                                                                            df$anteDiab + df$anteDyslip + df$anteHTA + df$anteCardioVasc + df$anteNeo + df$cmvR + df$AcHBsR + df$Tabm + df$incompABDR + df$before_2008 +sqrt(df$Tdial) + df$tabac + strata(df$centre) + x))$coefficients[18,]),4)
+####################################  Fonction d'ajout d'interaction au modele
 
-tab_univ_donneur <- t(tab_univ_donneur)
-tab_univ_donneur
-colnames(tab_univ_donneur) <- c('\\beta','HR','SE(\\beta)','Z','p')
-rownames(tab_univ_donneur) <- c('Donor age','Donor Height','Donor Weight','Last donor diuresis','Donor urea','Donor creatinine','Donor men',
-                                'Donor after cardiac death','Donor death vascular etiology','Donor history of hypertension','Donor history of diabetes',
-                                'Donor history of cardiac arrest','Donor proteinuria positive','Donor CMV serology positive','Donor BMI')
+ajout_candidat<-function(modele,candidat)
+{
+  mod_text <- modele$call %>% deparse() %>% paste(collapse="")
+  pos <- regexpr("~",mod_text)
+  mod2_text <- paste0(substr(mod_text,1,pos),candidat,"+",substr(mod_text,pos+1,nchar(mod_text)))
+  
+  out <- tryCatch(mod2_text %>% str2lang %>% eval(), warning=function(w) {return(NA)})
+  return(out)
+}
 
-
-
-# Export en PDF
-
-tab_univ_donneur %>%
-  kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_univ_donneur.pdf')
+#################################### Table univariée
+tab_inter_signif<- round(sapply(inter_signif2,function(x) summary(ajout_candidat(model_receveur,x))$coefficients[15,]),3)
 
 
+tab_inter_signif <- t(tab_inter_signif)
+colnames(tab_inter_signif) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_inter_signif
 
-# Construction du modèle enrichi
+#################################### Stepwise
 
-model_complet <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                                 # Variables du receveur
-                                 ageR + imcR + sexeR + malIni2cl + hemodial +
-                                 anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac +
-                                 # Variables de la greffe
-                                 sqrt(Tdial) + Tabm + incompABDR + before_2008 + strata(centre)
+stepdat <- na.omit(df[,c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD','Tdial','incomp2cl',
+                         'ageR','anteDiab','anteCardioVasc','hemodial','anteNeo','malIni2cl','TpsEvtYear','Evt')])
+modback <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                   # Variables du donneur
+                   ageD + card_death + causeDCD2cl +
+                   cmvD + tailleD + poidsD +
+                   # Variables de la greffe
+                   incomp2cl + Tdial +
+                   # Variables du receveur
+                   ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                   # Interactions internes
+                   ageD:ageR + malIni2cl:ageD + incomp2cl:hemodial + incomp2cl:card_death + 
+                     ageR:causeDCD2cl + anteDiab:causeDCD2cl + cmvD:hemodial,
+                 data=stepdat)
+
+fastbw(coxph2cph(modback),rule='p',sls=0.05,force = 1:14)
+
+#################################### Modèle retenu
+
+model_complet_intersig <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD +
+                                  # Variables de la greffe
+                                  incomp2cl + Tdial +
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df)
+
+summary(model_complet_intersig)
+
+#####################################################################################################################
+# INTERACTIONS AVEC VARIABLES EXTERNES
+#####################################################################################################################
+
+#################################### Liste des candidates
+
+inter_nosignif2 <- c('ageD:sexeR','ageD:anteDyslip','ageD:anteHTA','ageD:cmvR','ageD:AcHBsR',
+                   'ageD:imcR','ageD:antiClassI.jour','ageD:antiClassII.jour',
+                   'card_death:sexeR','card_death:anteHTA','card_death:antiClassI.jour','card_death:antiClassII.jour',
+                   'card_death:imcR',
+                   'causeDCD2cl:anteDyslip','causeDCD2cl:anteHTA','causeDCD2cl:cmvR','causeDCD2cl:AcHBsR',
+                   'causeDCD2cl:antiClassII.jour','causeDCD2cl:imcR',
+                   'cmvD:imcR','cmvD:cmvR',
+                   'tailleD:sexeR','tailleD:anteDyslip','tailleD:antiClassI.jour','tailleD:cmvR',
+                   'tailleD:imcR',
+                   'poidsD:imcR','poidsD:sexeR','poidsD:anteDyslip','poidsD:antiClassI.jour',
+                   'poidsD:antiClassII.jour'
+)
+
+#################################### Table univariée
+tab_inter_nosignif<- round(sapply(inter_nosignif2,function(x) summary(ajout_candidat(model_complet_intersig,x))$coefficients[15,]),3)
+
+
+tab_inter_nosignif <- t(tab_inter_nosignif)
+colnames(tab_inter_nosignif) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_inter_nosignif
+
+#################################### Stepwise
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD +
+                                  # Variables de la greffe
+                                  incomp2cl + Tdial +
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl +
+                                  # Interactions externes
+                                  card_death:imcR + causeDCD2cl:imcR + cmvD:cmvR +
+                                  tailleD:imcR + poidsD:imcR,
+                                data=df)
+
+summary(model_complet_inter)
+
+# -tailleD:imcR
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl +
+                               # Interactions externes
+                               card_death:imcR + causeDCD2cl:imcR + cmvD:cmvR +
+                               poidsD:imcR,
+                             data=df)
+
+summary(model_complet_inter)
+
+
+# -causeDC:imcR
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl +
+                               # Interactions externes
+                               card_death:imcR + cmvD:cmvR +
+                               poidsD:imcR,
+                             data=df)
+
+summary(model_complet_inter)
+
+
+# -cmvD:cmvR
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl +
+                               # Interactions externes
+                               card_death:imcR + 
+                               poidsD:imcR,
+                             data=df)
+
+summary(model_complet_inter)
+
+
+# -card_death:imcR
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl +
+                               # Interactions externes
+                               poidsD:imcR,
+                             data=df)
+
+summary(model_complet_inter)
+
+
+#################################### Modèle retenu
+
+model_complet_inter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl,
+                             data=df)
+
+summary(model_complet_inter)
+
+#####################################################################################################################
+# REINJECTION DE VARIABLES REJETEES
+#####################################################################################################################
+
+#################################### Variables candidates
+
+var_rej <- c('diureseD','ureeD','creatD','sexeD','htaD','diabD','arretD','protuD','iscHeure',
+             'imcR','sexeR','anteDyslip','anteHTA','anteUro','cmvR','AcHBsR','antiClassI.jour','antiClassII.jour')
+tab_rej<- round(sapply(var_rej,function(x) summary(ajout_candidat(model_complet_inter,x))$coefficients[1,]),3)
+tab_rej <- t(tab_rej)
+colnames(tab_rej) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_rej
+
+#################################### Modèle de base
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                               # Variables du donneur
+                               ageD + card_death + causeDCD2cl +
+                               cmvD + tailleD + poidsD +
+                               # Variables de la greffe
+                               incomp2cl + Tdial +
+                               # Variables du receveur
+                               ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                               # Interactions internes
+                               ageD:ageR + ageR:causeDCD2cl +
+                               # Variables rejetées
+                               creatD + sexeD + protuD + iscHeure + imcR + antiClassII.jour,
+                             data=df)
+
+summary(model_complet_rej)
+
+#################################### Backward
+
+# -protuD
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD +
+                             # Variables de la greffe
+                             incomp2cl + Tdial +
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl +
+                             # Variables rejetées
+                             creatD + sexeD + iscHeure + imcR + antiClassII.jour,
+                           data=df)
+
+summary(model_complet_rej)
+
+#-imcR
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD +
+                             # Variables de la greffe
+                             incomp2cl + Tdial +
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl +
+                             # Variables rejetées
+                             creatD + sexeD + iscHeure + antiClassII.jour,
+                           data=df)
+
+summary(model_complet_rej)
+
+#-sexeD
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD +
+                             # Variables de la greffe
+                             incomp2cl + Tdial +
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl +
+                             # Variables rejetées
+                             creatD + iscHeure + antiClassII.jour,
+                           data=df)
+
+summary(model_complet_rej)
+
+#-anticlass
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD +
+                             # Variables de la greffe
+                             incomp2cl + Tdial +
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl +
+                             # Variables rejetées
+                             creatD + iscHeure,
+                           data=df)
+
+summary(model_complet_rej)
+
+
+#################################### Modèle retenu
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+summary(model_complet_rej)
+
+
+#####################################################################################################################
+# REMISE EN CAUSE VARIABLES
+#####################################################################################################################
+
+#################################### Modèle de base
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+summary(model_complet_rej)
+
+#################################### Backward
+
+fastbw(coxph2cph(model_complet_rej),rule='p',sls=0.05,force = 16:18)
+
+
+###### Effet confondant anteNeo ?
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + anteNeo + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+model_complet_rej2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + malIni2cl +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+coef(model_complet_rej)[1:7]/coef(model_complet_rej2)[1:7] # Pas de var de plus de 10%, on supprime
+
+###### Effet confondant malIni ?
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + malIni2cl + 
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+model_complet_rej2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                              # Variables du donneur
+                              ageD + card_death + causeDCD2cl +
+                              cmvD + tailleD + poidsD + creatD + 
+                              # Variables de la greffe
+                              incomp2cl + Tdial + iscHeure + 
+                              # Variables du receveur
+                              ageR + anteDiab + anteCardioVasc + hemodial + 
+                              # Interactions internes
+                              ageD:ageR + ageR:causeDCD2cl,
+                            data=df)
+
+coef(model_complet_rej)[1:7]/coef(model_complet_rej2)[1:7] # Pas de var de plus de 10%, on supprime
+
+
+
+#################################### Modèle retenu
+
+model_complet_rej <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+
+#####################################################################################################################
+# NOUVELLES INTERACTIONS INTERNES
+#####################################################################################################################
+
+####################################  Liste des candidates
+inter_signif2 <- c('incomp2cl:ageD',
+                   'hemodial:ageD','anteDiab:ageD',
+                   'anteCardioVasc:ageD',
+                   'ageD:Tdial',
+                   'incomp2cl:card_death',
+                   'hemodial:card_death',
+                   'anteCardioVasc:card_death',
+                   'hemodial:causeDCD2cl','anteDiab:causeDCD2cl',
+                   'anteCardioVasc:causeDCD2cl',
+                   'cmvD:hemodial','cmvD:anteDiab','cmvD:ageR',
+                   'tailleD:hemodial','tailleD:anteCardioVasc','tailleD:ageR',
+                   'poidsD:hemodial','poidsD:ageR',
+                   'creatD:hemodial','creatD:ageR'
+)
+
+#################################### Table univariée
+tab_inter_signif<- round(sapply(inter_signif2,function(x) summary(ajout_candidat(model_complet_rej,x))$coefficients[15,]),3)
+
+tab_inter_signif <- t(tab_inter_signif)
+colnames(tab_inter_signif) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_inter_signif
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + iscHeure + 
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl + anteDiab:ageD + 
+                             incomp2cl:card_death + hemodial:card_death +
+                             cmvD:hemodial + tailleD:anteCardioVasc + tailleD:ageR +
+                             creatD:ageR,
+                           data=df)
+summary(model_complet_reinter)
+
+# -tailleD:anteCard
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
                                  # Variables du donneur
-                                 ageD + tailleD + sexeD + causeDCD2cl + htaD + diabD + arretD + cmvD
-                               ,data = df)
-summary(model_complet) 
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + anteDiab:ageD + 
+                                 incomp2cl:card_death + hemodial:card_death +
+                                 cmvD:hemodial + tailleD:ageR +
+                                 creatD:ageR,
+                               data=df)
+summary(model_complet_reinter)
+
+# -tailleD:ageR
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + anteDiab:ageD + 
+                                 incomp2cl:card_death + hemodial:card_death +
+                                 cmvD:hemodial + 
+                                 creatD:ageR,
+                               data=df)
+summary(model_complet_reinter)
+
+# -anteDiab:ageD
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + 
+                                 incomp2cl:card_death + hemodial:card_death +
+                                 cmvD:hemodial + 
+                                 creatD:ageR,
+                               data=df)
+summary(model_complet_reinter)
+
+# -hemodial:card_death
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + 
+                                 incomp2cl:card_death + 
+                                 cmvD:hemodial + 
+                                 creatD:ageR,
+                               data=df)
+summary(model_complet_reinter)
+
+# -cmvD:hemodial
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + 
+                                 incomp2cl:card_death + 
+                                 creatD:ageR,
+                               data=df)
+summary(model_complet_reinter)
+
+# -creatD:ageR
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl + 
+                                 incomp2cl:card_death,
+                               data=df)
+summary(model_complet_reinter)
+
+# -incomp2cl:card_death
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
+summary(model_complet_reinter)
 
 
-################## Log-linéarité
-
-## Age donneur -- Passer au carré
-df$ageD2 <- df$ageD**2
-df$ageDlog <- log(1+df$ageD)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~ageD+sqrt(ageD)+ageD2+ageDlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$ageD),])
 
 
-## Taille Donneur -- Non LL
-df$tailleD2 <- df$tailleD**2
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~tailleD+sqrt(tailleD)+tailleD2+log(tailleD),data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$tailleD),])
 
-## Poids Donneur -- Non LL
-df$poidsD2 <- df$poidsD**2
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~poidsD+sqrt(poidsD)+poidsD2+log(poidsD),data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$poidsD),])
+#####################################################################################################################
+# MODELE FINAL
+#####################################################################################################################
 
-## IMC -- OK
-df$imcD2 <- df$imcD**2
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~imcD+sqrt(imcD)+imcD2+log(imcD),data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$imcD),])
+####################################  Confusion incomp2cl ?
 
-### => Garder l'imc
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
 
-## Diurese -- passer au log
-df$diureseD2 <- df$diureseD**2
-df$diureseDlog <- log(df$diureseD+1)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~diureseD+sqrt(diureseD)+diureseD2+diureseDlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$diureseD),])
-# Nouveau test univarié - AJOUT AU MODELE
-coxph(Surv(TpsEvtYear, Evt) ~ ageR + imcR + sexeR + malIni2cl + hemodial + anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + Tabm + Tdial + incompABDR + before_2008 + diureseDlog + strata(centre),data = df)
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
 
-
-## Uree -- passer au log
-df$ureeD2 <- df$ureeD**2
-df$ureeDlog <- log(df$ureeD+1)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~ureeD+sqrt(ureeD)+ureeD2+ureeDlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$ureeD),])
-# Nouveau test univarié
-coxph(Surv(TpsEvtYear, Evt) ~ ageR + strata(centre) + imcR + sexeR + malIni2cl + hemodial + anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + Tabm + Tdial + incompABDR + before_2008 + ureeDlog,data = df)
-
-## Creat -- OK
-df$creatD2 <- df$creatD**2
-df$creatDlog <- log(1+df$creatD)
-mart_res_null <- coxph(Surv(TpsEvtYear,Evt)~creatD+sqrt(creatD)+creatD2+creatDlog,data=df)
-ggcoxfunctional(mart_res_null, data = df[!is.na(df$creatD),])
+coef(model_complet_reinter)[c(1:7,9,10)]/coef(model_complet_reinter2)[1:9] # confusion, on garde
 
 
-################## Proportionnalité des risques
+####################################  Confusion causeDC ?
 
-## résidus de Schoenfeld 
-par(mfrow=c(4,4))
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
 
-list_plot_schoen <- lapply(c(var_donneur), function(x) plot(main=x,cox.zph(coxph(Surv(df$TpsEvtYear,df$Evt)~df[,x]) )))
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + 
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  incomp2cl + Tdial + iscHeure + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df)
 
+coef(model_complet_reinter)[c(1:2,4:10)]/coef(model_complet_reinter2)[1:9] # confusion, on garde
 
-## plots log-log QUALI
+####################################  IMC ou taille/poids ?
 
-par(mfrow=c(3,3))
-
-list_plot_loglog <- lapply(var_donneur[7:14], function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
-                                                           xlab="Temps post  sortie (jours)", mark.time=FALSE))
-
-
-par(mfrow=c(1,1))
-
-################## Modèle retenu
-
-# Construction du modèle de base
-
-model_complet_taillepoids <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                         # Variables du receveur
-                         ageR + imcR + sexeR + malIni2cl + hemodial +
-                         anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac +
-                         # Variables de la greffe
-                         sqrt(Tdial) + Tabm + incompABDR + before_2008 + strata(centre) +
-                         # Variables du donneur
-                         ageD2 + tailleD + sexeD + causeDCD2cl + htaD + diabD + arretD + cmvD + diureseDlog
-                       ,data = df)
-summary(model_complet_taillepoids) 
-model_complet_taillepoids$loglik
-
-model_complet_imc <- coxph(Surv(TpsEvtYear, Evt) ~ 
-                                     # Variables du receveur
-                                     ageR + imcR + sexeR + malIni2cl + hemodial +
-                                     anteDiab + anteDyslip + anteHTA + anteCardioVasc + anteNeo + cmvR + AcHBsR + tabac +
-                                     # Variables de la greffe
-                                     sqrt(Tdial) + Tabm + incompABDR + before_2008 + strata(centre) +
-                                     # Variables du donneur
-                                     ageD2 + imcD + sexeD + causeDCD2cl + htaD + diabD + arretD + cmvD + diureseDlog
-                                   ,data = df)
-summary(model_complet_imc) 
-model_complet_imc$loglik # On conserve l'imc
-
-model_complet <- model_complet_imc
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
+summary(model_final)
+BIC(model_final)
 
 
-# Export du modèle de base en pdf
+#################################### Nouvelle possibilité d'ajout ?
 
-model_complet_df <- as.data.frame(tidy(model_complet))
-model_complet_df$hr <- exp(model_complet_df$estimate)
-model_complet_df <- model_complet_df[c(2,6,3:5)]
-rownames(model_complet_df) <- c('Recipient Age','Recipient BMI (squared)','Recipient men','Relapsing initial nephropathy','Hemodialysis','History of smoking',
-                               'History of diabetes','History of Dyslipidemia','History of hypertension',
-                               'History of cardiovascular disease','History of neoplasia',
-                               'Positive recipient CMV serology','Positive recipient AcHBs serology','Time on dialysis (sqrt)','Time on waiting list',
-                               'HLA A-B-DR incompatibilities','Transplanted before 2008','Donor age (squared)','Donor BMI','Donor men','Donor death vascular etiology','Donor history of hypertension','Donor history of diabetes',
-                               'Donor history of cardiac arrest','Donor CMV serology positive','Last donor diuresis')
-colnames(model_complet_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
+var_rej <- c('diureseD','ureeD','sexeD','htaD','diabD','arretD','protuD',
+             'imcR','sexeR','anteDyslip','anteHTA','anteUro','cmvR','AcHBsR','antiClassI.jour','antiClassII.jour')
+tab_rej2<- round(sapply(var_rej,function(x) summary(ajout_candidat(model_final,x))$coefficients[1,]),3)
+tab_rej2 <- t(tab_rej2)
+colnames(tab_rej2) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_rej2
 
-model_complet_df %>%
+
+#################################### Export du modèle de base en pdf
+
+model_final_df <- as.data.frame(tidy(model_final))
+model_final_df$hr <- exp(model_final_df$estimate)
+model_final_df <- model_final_df[c(2,6,3:5)]
+rownames(model_final_df) <- c('Donor Age','Donor after cardiac death','Donor death vascular etiology','Positive donor CMV serology','Donor height',
+                                          'Donor weight','Donor creatinine','HLA incompatibilities>=4','Time on dialysis','Cold ischemia time','Recipient Age',
+                                          'History of diabetes','History of cardiovascular disease','Hemodialysis','Recipient age:Donor age',
+                                          'Donor death vascular etiology:Recipient age')
+colnames(model_final_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
+
+model_final_df %>%
   kable("latex", booktabs = T, escape = F) %>%
-  save_kable(file='/home/corentin/Documents/Stage/Projet R/Tables/Univarié/Cox/cox_mod_complet.pdf')
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2//modele_final_avec_interactions_step.pdf')
 
 
 
+#####################################################################################################################
+# CENTRE / PERIODE
+#####################################################################################################################
+
+################## Centre
+
+model_finalb <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + 
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df,ties = 'breslow')
+summary(model_finalb)
+AIC(model_finalb)
+
+model_final_centre <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                        # Variables du donneur
+                        ageD + card_death + causeDCD2cl +
+                        cmvD + tailleD + poidsD + creatD + 
+                        # Variables de la greffe
+                        incomp2cl + Tdial + iscHeure + 
+                        # Variables du receveur
+                        ageR + anteDiab + anteCardioVasc + hemodial +
+                        # Interactions internes
+                        ageD:ageR + ageR:causeDCD2cl + frailty(centre,'gamma'),
+                      data=df,ties = 'breslow')
+summary(model_final_centre)
+AIC(model_final_centre)
+AIC(model_final_centre);AIC(model_finalb) # Effet centre non significatif
+
+################## Période
+
+table(df$yearG,df$tacro) # 50-50 en 2006, 75-25 en 2011, saut en 2012
+table(df$yearG,df$machPerf) # 2016 (début de forte croissance vers 2012)
+
+###### Tacrolimus
+
+#### 2006
+df$before_2006 <- df$yearG<=2006
+
+list_plot_loglog <- lapply(c('before_2006'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+m2006 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2006,
+              data=df,ties = 'breslow')
+AIC(m2006);AIC(model_finalb) # Effet 2006 non significatif
+
+#### 2007
+df$before_2007 <- df$yearG<=2007 
+
+list_plot_loglog <- lapply(c('before_2008'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+m2007 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2007,
+              data=df,ties = 'breslow')
+AIC(m2007);AIC(model_finalb) # Effet 2007 non significatif
+
+#### 2008
+
+list_plot_loglog <- lapply(c('before_2008'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+m2008 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2008,
+              data=df,ties = 'breslow')
+AIC(m2008);AIC(model_finalb) # Effet 2008 non significatif
+
+
+#### 2009
+df$before_2009 <- df$yearG<=2009
+
+list_plot_loglog <- lapply(c('before_2009'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+m2009 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2009,
+              data=df,ties = 'breslow')
+AIC(m2009);AIC(model_finalb) # Effet 2009 non significatif
+
+
+
+#### 2010
+df$before_2010 <- df$yearG<=2010
+
+list_plot_loglog <- lapply(c('before_2010'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+
+m2010 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2010,
+              data=df,ties = 'breslow')
+AIC(m2010);AIC(model_finalb) # Effet 2010 non significatif
+
+
+
+
+#### 2011
+df$before_2011 <- df$yearG<=2011
+
+list_plot_loglog <- lapply(c('before_2011'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+m2011 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2011,
+              data=df,ties = 'breslow')
+AIC(m2011);AIC(model_finalb) # Effet 2011 non significatif
+
+###### Machine Perf
+
+#### 2016
+df$before_2015 <- df$yearG<=2015
+
+list_plot_loglog <- lapply(c('before_2015'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+m2015 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2015,
+              data=df,ties = 'breslow')
+AIC(m2015);AIC(model_finalb) # Effet 2016 non significatif
+
+#### 2016
+df$before_2016 <- df$yearG<=2016
+
+list_plot_loglog <- lapply(c('before_2016'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+m2016 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2016,
+              data=df,ties = 'breslow')
+AIC(m2016);AIC(model_finalb) # Effet 2016 non significatif
+
+#### 2017
+df$before_2017 <- df$yearG<=2017
+
+list_plot_loglog <- lapply(c('before_2017'), function(x) plot(main=x,survfit(Surv(TpsEvtYear,Evt)~df[,x],data=df) , fun=log.minus.log, ylab="log(-log(S(Temps)))", col=1:2, lty=1:2, 
+                                                              xlab="Temps post  sortie (jours)", mark.time=FALSE))
+
+m2017 <-coxph(Surv(TpsEvtYear, Evt) ~ 
+                # Variables du donneur
+                ageD + card_death + causeDCD2cl +
+                cmvD + tailleD + poidsD + creatD + 
+                # Variables de la greffe
+                incomp2cl + Tdial + iscHeure + 
+                # Variables du receveur
+                ageR + anteDiab + anteCardioVasc + hemodial +
+                # Interactions internes
+                ageD:ageR + ageR:causeDCD2cl + before_2017,
+              data=df,ties = 'breslow')
+AIC(m2017);AIC(model_finalb) # Effet 2017 non significatif
+
+
+#####################################################################################################################
+# MODELE FINAL AVEC EFFET PERIODE
+#####################################################################################################################
+
+####################################  Confusion iscHeure ?
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + before_2012 + 
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
+summary(model_complet_reinter)
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  incomp2cl + Tdial + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df[!is.na(df$iscHeure),])
+summary(model_complet_reinter2)
+
+AIC(model_complet_reinter2);AIC(model_complet_reinter) # Augmentation de l'AIC, on garde
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  incomp2cl + Tdial + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df)
+coef(model_complet_reinter)[c(1:9)]/coef(model_complet_reinter2)[1:9] # confusion, moyenne partout, on garde
+
+
+
+####################################  Confusion incomp2cl ?
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + before_2012 +
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
+summary(model_complet_reinter)
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  Tdial + iscHeure + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df[!is.na(df$incomp2cl),])
+summary(model_complet_reinter2)
+AIC(model_complet_reinter2);AIC(model_complet_reinter) # Augmentation de l'AIC, on garde
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death + causeDCD2cl +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  Tdial + iscHeure + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df)
+summary(model_complet_reinter2)
+coef(model_complet_reinter)[c(1:7,9,10)]/coef(model_complet_reinter2)[1:9] # confusion, on garde
+
+####################################  Confusion causeDC ?
+
+model_complet_reinter <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                 # Variables du donneur
+                                 ageD + card_death + causeDCD2cl +
+                                 cmvD + tailleD + poidsD + creatD + 
+                                 # Variables de la greffe
+                                 incomp2cl + Tdial + iscHeure + before_2012 +
+                                 # Variables du receveur
+                                 ageR + anteDiab + anteCardioVasc + hemodial +
+                                 # Interactions internes
+                                 ageD:ageR + ageR:causeDCD2cl,
+                               data=df)
+summary(model_complet_reinter)
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  Tdial + iscHeure + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df[!is.na(df$causeDCD2cl),])
+summary(model_complet_reinter2)
+AIC(model_complet_reinter2);AIC(model_complet_reinter) # Augmentation de l'AIC, on garde
+
+model_complet_reinter2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                                  # Variables du donneur
+                                  ageD + card_death +
+                                  cmvD + tailleD + poidsD + creatD + 
+                                  # Variables de la greffe
+                                  Tdial + iscHeure + before_2012 + 
+                                  # Variables du receveur
+                                  ageR + anteDiab + anteCardioVasc + hemodial +
+                                  # Interactions internes
+                                  ageD:ageR + ageR:causeDCD2cl,
+                                data=df)
+summary(model_complet_reinter2)
+coef(model_complet_reinter)[c(1:2,4:10)]/coef(model_complet_reinter2)[1:9] # confusion, on garde
+
+
+####################################  Modèle retenu
+
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df)
+summary(model_final)
+AIC(model_final)
+
+
+#################################### Nouvelle possibilité d'ajout à alpha=0.2 ?
+
+var_rej <- c('diureseD','ureeD','sexeD','htaD','diabD','arretD','protuD',
+             'imcR','sexeR','anteDyslip','anteHTA','anteUro','cmvR','AcHBsR','antiClassI.jour','antiClassII.jour')
+tab_rej2<- round(sapply(var_rej,function(x) summary(ajout_candidat(model_final,x))$coefficients[1,]),3)
+tab_rej2 <- t(tab_rej2)
+colnames(tab_rej2) <- c('\\beta','HR','SE(\\beta)','Z','p')
+tab_rej2
+
+#################################### imcR en ajustement ?
+
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + 
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df[!is.na(df$imcR),])
+summary(model_final)
+
+model_final2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df)
+summary(model_final2)
+
+coef(model_final)[c(1:9)]/coef(model_final2)[1:9] # ajustement, on garde
+
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df)
+summary(model_final)
+
+#################################### Supprimer iscHeure ?
+
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + iscHeure + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df)
+summary(model_final)
+
+model_final2 <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                        # Variables du donneur
+                        ageD + card_death + causeDCD2cl +
+                        cmvD + tailleD + poidsD + creatD + 
+                        # Variables de la greffe
+                        incomp2cl + Tdial + before_2012 +
+                        # Variables du receveur
+                        ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                        # Interactions internes
+                        ageD:ageR + ageR:causeDCD2cl,
+                      data=df[!is.na(df$iscHeure),])
+summary(model_final2)
+
+coef(model_final)[c(1:9)]/coef(model_final2)[1:9] 
+AIC(model_final);AIC(model_final2) # Supprime iscHeure
+
+
+####################################  Modèle retenu
+
+model_final <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                       # Variables du donneur
+                       ageD + card_death + causeDCD2cl +
+                       cmvD + tailleD + poidsD + creatD + 
+                       # Variables de la greffe
+                       incomp2cl + Tdial + before_2012 +
+                       # Variables du receveur
+                       ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                       # Interactions internes
+                       ageD:ageR + ageR:causeDCD2cl,
+                     data=df)
+summary(model_final)
+
+
+#################################### Export du modèle de base en pdf
+
+model_final_df <- as.data.frame(tidy(model_final))
+model_final_df$hr <- exp(model_final_df$estimate)
+model_final_df <- model_final_df[c(2,6,3:5)]
+rownames(model_final_df) <- c('Donor Age','Donor after cardiac death','Donor death vascular etiology','Positive donor CMV serology','Donor height',
+                              'Donor weight','Donor creatinine','HLA incompatibilities>=4','Time on dialysis','Transplanted before 2012','Recipient Age',
+                              'History of diabetes','History of cardiovascular disease','Hemodialysis','Recipient BMI','Recipient age:Donor age',
+                              'Donor death vascular etiology:Recipient age')
+colnames(model_final_df) <- c('\\beta','HR','SE(\\beta)','statistic','p')
+
+model_final_df %>%
+  kable("latex", booktabs = T, escape = F) %>%
+  save_kable(file='/home/corentin/Documents/tables_graphes/Stratégie 2//modele_final_avec_interactions_step.pdf')
+
+
+
+
+
+
+
+#####################################################################################################################
+# VALIDATION
+#####################################################################################################################
+
+####################################  Courbe ROC temps-dépendante
+
+df$lp <- predict(model_final,type='lp',newdata = df)
+survivalROC_helper <- function(t) {
+  survivalROC(Stime        = df$TpsEvtYear,
+              status       = df$Evt,
+              marker       = df$lp,
+              predict.time = t,
+              method       = "NNE",
+              span = 0.25 * nrow(df)^(-0.20))
+}
+
+
+survivalROC_data <- data_frame(t = 1:10) %>%
+  mutate(survivalROC = map(t, survivalROC_helper),
+         ## Extract scalar AUC
+         auc = map_dbl(survivalROC, magrittr::extract2, "AUC"),
+         ## Put cut off dependent values in a data_frame
+         df_survivalROC = map(survivalROC, function(obj) {
+           as_data_frame(obj[c("cut.values","TP","FP")])
+         })) %>%
+  dplyr::select(-survivalROC) %>%
+  unnest() %>%
+  arrange(t, FP, TP)
+
+survivalROC_data %>%
+  ggplot(mapping = aes(x = FP, y = TP)) +
+  geom_point() +
+  geom_line() +
+  geom_label(data = survivalROC_data %>% dplyr::select(t,auc) %>% unique,
+             mapping = aes(label = sprintf("%.3f", auc)), x = 0.5, y = 0.5) +
+  facet_wrap( ~ t) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.key = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        strip.background = element_blank())
+
+
+#################################### Calibration
+
+##### Test de Nam-D'Agostino (calibration)
+
+model_final_calib <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                             # Variables du donneur
+                             ageD + card_death + causeDCD2cl +
+                             cmvD + tailleD + poidsD + creatD + 
+                             # Variables de la greffe
+                             incomp2cl + Tdial + before_2012 +
+                             # Variables du receveur
+                             ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                             # Interactions internes
+                             ageD:ageR + ageR:causeDCD2cl,
+                           data=df)
+summary(model_final_calib)
