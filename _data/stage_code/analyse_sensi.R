@@ -444,7 +444,7 @@ tab_permissif %>%
 
 # Construction
 
-var_lasso <- c(var_donneur2,var_receveur,var_greffe)
+var_lasso <- c(var_donneur,var_receveur,var_greffe)
 df_lasso <- drop_na(df[,c(var_lasso,'TpsEvtYear','Evt')])
 y <- Surv(df_lasso$TpsEvtYear,df_lasso$Evt)
 x <- model.matrix(y ~ ageR+imcR+sexeR+malIni2cl+hemodial+anteDiab+anteDyslip+anteHTA+
@@ -1457,3 +1457,8 @@ model_complet_inter4_df %>%
 
 
 
+
+#####################################################################################################################
+# Pliable LASSO
+#####################################################################################################################
+# library(pliable) plus maintenu

@@ -26,6 +26,7 @@ library(tidyverse) # Data management courbes ROC
 library(survivalROC) # Courbes ROC temps dépendante
 library(survival.calib) # Calibration pour modèles de survie
 library(riskRegression) # Prédiction des risques
+library(pec) # PredictSurvProb, brier score
 
 ## Paramètres
 
@@ -351,14 +352,15 @@ pglob <- ggsurvplot(fit = Obj.Surv, data = df, pval = F,
                     risk.table.y.text = FALSE,
                     linetype = c("solid"),
                     risk.table = T,
-                    title = "Courbe de survie globale",
-                    risk.table.title = 'Effectif à risque',
-                    xlab = "Temps post-greffe (Années)",
-                    ylab = "Probabilité de survie",
+                    title = NULL,
+                    risk.table.title = 'Number of at-risk patients',
+                    xlab = "Post-transplantation time (years)",
+                    ylab = "Graft and patient survival probability",
                     xlim = c(0, as.integer(max(df$TpsEvtYear))+1),
                     ylim = c(0,1),
                     censor = F,
                     surv.scale = "default",
+                    color='#99332d',
                     fontsize = 3,
                     tables.theme = theme_light(),
                     break.time.by = 1,
@@ -368,8 +370,8 @@ pglob <- ggsurvplot(fit = Obj.Surv, data = df, pval = F,
 
 
 ppglob <- pglob$plot + geom_point(aes(x=timelist, y=probsurv), data = dftt) + geom_text_repel(aes(x=timelist, y=probsurv,label=label),vjust= -2, data = dftt) +
-  theme(plot.title = element_text(hjust = 0.5))
-ptglob <- pglob$table + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.title.x = element_text(size = 10))
+  theme(plot.title = element_text(hjust = 0.5),axis.title.x = element_text(size = 10),axis.title.y = element_text(size = 10))
+ptglob <- pglob$table + theme(plot.title = element_text(hjust = 0.5,size=12)) + theme(axis.title.x = element_text(size = 10))
 grid.arrange(
   grobs = list(ppglob,ptglob),
   layout_matrix = rbind(c(1, 1),
@@ -2547,10 +2549,12 @@ model_final_df %>%
 
 
 #####################################################################################################################
-# VALIDATION
+# VALIDATION SUR ECHANTILLON D'APPRENTISSAGE
 #####################################################################################################################
 
-####################################  Courbe ROC temps-dépendante
+####################################  Discrimination
+
+##### Courbe ROC temps-dépendante
 
 df$lp <- predict(model_final,type='lp',newdata = df)
 survivalROC_helper <- function(t) {
@@ -2588,10 +2592,110 @@ survivalROC_data %>%
         plot.title = element_text(hjust = 0.5),
         strip.background = element_blank())
 
+##### Courbe ROC par strate du receveur
 
-#################################### Calibration
 
-##### Test de Nam-D'Agostino (calibration)
+
+
+
+
+#################################### Calibration 
+
+##### Calibration plot
+
+# Modèle final sur la base initiale
+
+model_final_calib <- coxph(Surv(TpsEvtYear, Evt) ~ 
+                           # Variables du donneur
+                           ageD + card_death + causeDCD2cl +
+                           cmvD + tailleD + poidsD + creatD + 
+                           # Variables de la greffe
+                           incomp2cl + Tdial + before_2012 +
+                           # Variables du receveur
+                           ageR + anteDiab + anteCardioVasc + hemodial + imcR +
+                           # Interactions internes
+                           ageD:ageR + ageR:causeDCD2cl,
+                         data=df,x=TRUE)
+model_final_calib
+
+# Probas de survie prédites à 10 ans
+
+predict.cox <- 1 - predictSurvProb(model_final_calib,newdata=df,times=10)
+
+predict.coxlog <- log(-log(1-predict.cox))
+
+# Splines cubiques pour interpoler (remplacable par loess)
+
+calibrate.cox <- coxph(Surv(TpsEvtYear,Evt) ~ rcs(predict.coxlog,3),x=T,
+                       
+                       data=df)
+
+# Grille pour le graphe
+
+predict.grid.cox <- seq(quantile(predict.cox,probs=0.01,na.rm=T),
+                        
+                        quantile(predict.cox,probs=0.99,na.rm=T),length=100)
+
+predict.grid.cox.cll <- log(-log(1-predict.grid.cox))
+
+predict.grid.cox.df <- data.frame(predict.grid.cox)
+
+predict.grid.cox.cll.df <- data.frame(predict.grid.cox.cll)
+
+names(predict.grid.cox.df) <- "cox.1yr"
+
+names(predict.grid.cox.cll.df) <- "predict.coxlog"
+
+# Extraction des datas pour le plot
+
+predict.calibrate.cox <- 1 - predictSurvProb(calibrate.cox,
+                                             newdata=predict.grid.cox.cll.df,times=10)
+
+# Extraction de l'intercerpt et la pente
+
+lm.calibrate <- lm(predict.calibrate.cox~predict.grid.cox) 
+# predict.grid contient les probas prédites et predict.calibrate 
+# la régression en splines des probas observées sur ces probas prédites
+
+lm.calibrate$coefficients
+
+confint(lm.calibrate)
+
+summary(lm.calibrate)
+
+# Calibration plot
+
+plot.df <- data.frame(x=predict.grid.cox,y=predict.calibrate.cox)
+
+ggplot(plot.df,aes(x=x,y=y,colour=NA)) + 
+  geom_line(col="#99000d") + 
+  geom_abline(col='#2b2b2b',intercept = 0,slope=1,lty=2) +
+  xlab('Predicted probability of 10-year mortality') +
+  ylab('Observed probability of 10-year mortality') + 
+  annotate('text',label=paste('Intercept:',round(lm.calibrate$coefficients[1],3)),x=0.25,y=0.9) + 
+  annotate('text',label=paste('Slope:',round(lm.calibrate$coefficients[2],3)),x=0.2375,y=0.87) +
+  labs(color="Legend") +
+  scale_color_manual(values=c('Calibration curve'='#99000d')) +
+  theme_bw() +
+  geom_rect(aes(xmin=0.80,xmax=0.94,ymin=0.1,ymax=0.28),fill='white') +
+  annotate('line',col='#99000d',x=c(0.82,0.85),y=c(0.23,0.23)) +
+  annotate('text',label='Calibration\ncurve',x=0.89,y=0.23,size=3) + 
+  annotate('line',col='#2b2b2b',lty=2,x=c(0.82,0.85),y=c(0.15,0.15)) +
+  annotate('text',label='Perfect\ncalibration',x=0.89,y=0.15,size=3)
+  
+
+
+#################################### Performance globale
+
+##### Brier score
+
+# Modèle sans NA
+
+var_mod <- c('ageD','card_death','causeDCD2cl','cmvD','tailleD','poidsD','creatD',
+             'incomp2cl','Tdial','before_2012','ageR','anteDiab',"anteCardioVasc",'hemodial','imcR',
+             'Evt','TpsEvtYear')
+
+df_nona <- na.omit(df[,var_mod])
 
 model_final_calib <- coxph(Surv(TpsEvtYear, Evt) ~ 
                              # Variables du donneur
@@ -2603,5 +2707,16 @@ model_final_calib <- coxph(Surv(TpsEvtYear, Evt) ~
                              ageR + anteDiab + anteCardioVasc + hemodial + imcR +
                              # Interactions internes
                              ageD:ageR + ageR:causeDCD2cl,
-                           data=df)
-summary(model_final_calib)
+                           data=df_nona,x=T)
+model_final_calib
+
+# Score
+
+perror <- pec(list(Cox=model_final_calib),Hist(TpsEvtYear,Evt)~1,data=df_nona)
+crps(perror,times=1:10,start=0) # Brier score
+
+
+#####################################################################################################################
+# VALIDATION INTERNE
+#####################################################################################################################
+
